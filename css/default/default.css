@@ -1,0 +1,169 @@
+
+/* (c) 2012 Etienne Bagnoud
+   This file is part of saddr project. saddr is under the MIT license.
+
+   See LICENSE file
+ */
+html { padding:0;margin:0;}
+body { padding:0;margin:0; font-family: sans-serif;}
+
+h1 { font-size: 1.6em; }
+h2 { font-size: 1.2em; }
+h3 { font-size: 1em; }
+
+div#saddr_searchBoxes {
+	background-color: #F9F9F9;
+	margin: 0; padding:0; position: relative;
+	padding-top: 5px; padding-bottom: 5px;
+	text-align: right;
+	font-size: 0.8em;
+}
+
+div#saddr_searchBoxes span#saddr_title {
+	float: left;
+	padding-left: 5px;
+	font-size: 1.6em; font-weight: bold;
+}
+
+div#saddr_content {
+	width: 96%;
+	margin: auto;
+   overflow: hidden;
+}
+
+div#saddr_footer {
+	clear: both; width: 100%; 
+	font-size: 0.6em;
+	position: relative; bottom: -20px;
+}
+
+div#saddr_footer div {
+	padding: 5px; 
+}
+
+div#saddr_footer span.cr {
+	float: right; padding: 5px;
+}
+
+a {
+	text-decoration: none;
+	color: #A00000;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+span#saddr_toolbox {
+   float: left; width: 30%; left: 2%;
+   font-size: 1em; font-weight: bold;
+   position: absolute; bottom: 0; right: 0;
+}
+
+span#saddr_toolbox span {
+   float: left; 
+   background-color: white;
+   margin-left: 2px;
+   padding: 3px; padding-left: 8px; padding-right: 8px;
+}
+
+span#saddr_toolbox span.dangerous {
+   float: right;
+}
+
+div#saddr_buttonsContainer {
+   clear: both; text-align: center; width: 100%;
+}
+
+div#saddr_messageContainer {
+   width: 100%;
+}
+
+div.saddr_message {
+   width: 96%; clear: both; margin: auto;
+   font-size: 0.6em;
+   padding: 1px;
+}
+
+div.saddr_msgError {
+   border: 1px dotted #FF0000;
+   background-color: #FFCCCC;
+}
+div.saddr_msgWarning {
+   border: 1px dotted #FFEE00;
+   background-color: #FFEECC;
+}
+div.saddr_msgGood {
+   border: 1px dotted #00FF00;
+   background-color: #CCFFCC;
+}
+
+div.saddr_section {
+   width: 48%;
+}
+
+div.saddr_sectionLeft {
+   float: left; clear: left;
+}
+div.saddr_sectionRight {
+   float: right; clear: right;
+   bolder: 1px solid red;
+}
+
+.saddr_label {
+   background-color: #F9F9F9;
+   display: inline-block; width: 35%;
+   float: left; clear: left;
+   font-size: 0.8em; line-height: 2em; font-weight: bold;
+}
+
+.saddr_value {
+   display: inline-block; 
+   float: right; clear: right;
+}
+
+div#edit .saddr_value {
+   width: 63% !important;
+}
+
+.saddr_valueNoLabel {
+   float: left !important;
+   width: 100%;
+}
+
+.saddr_groupOfValue {
+   clear: both; margin-top: 5px;
+   width: 100%; overflow: hidden;
+}
+
+.saddr_resultLine {
+   line-height: 2em;
+}
+
+.saddr_resultLine:hover {
+   background-color: #D9D9D9;
+}
+
+.saddr_resultLineOdd {
+   background-color: #F9F9F9;
+}
+
+.saddr_resField {
+   display: inline-block;
+}
+
+.saddr_res0 {
+   width: 24%;
+}
+
+.saddr_res1 {
+   width: 29%;
+}
+
+.saddr_res2 {
+   width: 15%;
+}
+
+.saddr_res3 {
+   width: 28%;
+}
