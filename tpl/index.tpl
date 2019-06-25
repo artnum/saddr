@@ -10,14 +10,18 @@
   <script src="js/location.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.1/dojo/dojo.js" data-dojo-config="parseOnLoad: true"></script>
 <script>
-dojo.require('dijit.form.Form');
-dojo.require('dijit.form.TextBox');
-dojo.require('dijit.form.NumberTextBox');
-dojo.require('dijit.form.Textarea');
-dojo.require('dijit.form.DateTextBox');
-dojo.require('dijit.form.FilteringSelect');
-dojo.require('dijit.Tooltip');
-dojo.require("dojox.form.Uploader");
+ dojo.require('dijit.form.Form');
+ dojo.require('dijit.form.TextBox');
+ dojo.require('dijit.form.NumberTextBox');
+ dojo.require('dijit.form.Textarea');
+ dojo.require('dijit.form.DateTextBox');
+ dojo.require('dijit.form.FilteringSelect');
+ dojo.require('dijit.Tooltip');
+ dojo.require("dojox.form.Uploader");
+
+ if (window.Conf && window.Conf.domain) {
+   document.domain = window.Conf.domain
+ }
 </script>
 <title>saddr</title>
 <link rel="stylesheet" href="css/default/default.css" type="text/css" />
