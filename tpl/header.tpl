@@ -49,12 +49,9 @@
 
 </span>
 
-Search : <input type="text" name="saddrGlobalSearch"
-  data-dojo-type="dijit.form.TextBox" />
-Tag : <input type="text" name="saddrTagSearch"
-  data-dojo-type="dijit.form.TextBox" />
-<input type="submit" value="Search" name="saddrGoSearch"
-  data-dojo-type="dijit.form.Button" data-dojo-props="label: 'Search'" />
+Search : <input type="text" name="saddrGlobalSearch" />
+Tag : <input type="text" name="saddrTagSearch" />
+<input type="submit" value="Search" name="saddrGoSearch" />
 </form>
 </div>
 {if isset($saddr.handle.user_messages)}

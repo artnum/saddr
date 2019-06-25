@@ -5,19 +5,23 @@
 */
 @import 'boxes.css';
 
-html { padding:0;margin:0;}
-body { padding:0;margin:0; font-family: sans-serif;}
+html { padding:0;margin:0; }
+body { padding:0;margin:0; font-family: sans-serif; font-size: 100% !important;}
 
 h1 { font-size: 1.6em; }
 h2 { font-size: 1.2em; }
 h3 { font-size: 1em; }
 
 div#saddr_searchBoxes {
-	background-color: #F9F9F9;
-	margin: 0; padding:0; position: relative;
-	padding-top: 5px; padding-bottom: 5px;
-	text-align: right;
-	font-size: 0.8em;
+    background-color: #F9F9F9;
+    margin: 0; padding:0; position: relative;
+    padding-top: 5px; padding-bottom: 5px;
+    text-align: right;
+    font-size: 1em;
+}
+
+div#saddr_searchBoxes input:focus[type="text"] {
+    width: 30%;
 }
 
 div#saddr_searchBoxes span#saddr_title {
@@ -27,15 +31,17 @@ div#saddr_searchBoxes span#saddr_title {
 }
 
 div#saddr_content {
-	width: 96%;
-	margin: auto;
-   overflow: hidden;
+    margin: 24px;
 }
 
 div#saddr_footer {
-	clear: both; width: 100%; 
-	font-size: 0.6em;
-	position: relative; bottom: -20px;
+    min-height: 22px;
+    max-height: 22px;
+    clear: both; width: 100%; 
+    font-size: 0.8em;
+    position: fixed;
+    bottom: 0;
+    background-color: white;
 }
 
 div#saddr_footer div {
@@ -82,7 +88,7 @@ div#saddr_messageContainer {
 
 div.saddr_message {
    width: 96%; clear: both; margin: auto;
-   font-size: 0.6em;
+   font-size: 0.8em;
    padding: 1px;
 }
 
@@ -115,7 +121,7 @@ div.saddr_sectionRight {
    background-color: #F9F9F9;
    display: inline-block; width: 35%;
    float: left; clear: left;
-   font-size: 0.8em; line-height: 2em; font-weight: bold;
+   font-size: 1em; line-height: 2em; font-weight: bold;
 }
 
 .saddr_value {
