@@ -9,8 +9,7 @@
 <h1>{$saddr.search_results.name.0}</h1> 
 {/if}
 {/if}
-
-
+<input type="hidden" name="dn" value="{$saddr.search_results.dn}" />
 <div id="saddrBusiness" class="saddr_section saddr_sectionLeft">
 <h2>Business</h2>
 {saddr_entry e="company" label="Company" searchable=1 must=1}

@@ -1,0 +1,15 @@
+.fullWidth {
+    clear: both;
+}
+
+.fullWidth > div {
+    display: flex;
+}
+
+.third {
+    max-height: 40vh;
+    overflow: auto;
+    min-width: 32%;
+    max-width: 33%;
+}
+

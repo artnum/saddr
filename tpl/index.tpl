@@ -5,7 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" 
 	lang="en">
 <head>
-<script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.1/dojo/dojo.js" data-dojo-config="parseOnLoad: true"></script>
+  <script src="conf/app.js"></script>
+  <script src="js/location.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.1/dojo/dojo.js" data-dojo-config="parseOnLoad: true"></script>
 <script>
 dojo.require('dijit.form.Form');
 dojo.require('dijit.form.TextBox');

@@ -9,7 +9,7 @@
 <h1>{$saddr.search_results.name.0}</h1> 
 {/if}
 {/if}
-
+<input type="hidden" name="dn" value="{$saddr.search_results.dn}" />
 <div id="saddrPicture" class="saddr_section saddr_sectionRight">
 {saddr_entry e="picture" label="Picture" type="jpeg"}
 </div>
