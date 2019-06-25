@@ -64,13 +64,24 @@
           when = 'futur'
         }
         let html = document.createElement('TR')
-        html.innerHTML = `<td class="value"><a href="${window.Conf.location.url.replace('%', reservation.id)}">${reservation.id}</a></td>
+        html.innerHTML = `<td class="value"><a data-reservation-uid="${reservation.id}" href="${window.Conf.location.url.replace('%', reservation.id)}">${reservation.id}</a></td>
                           <td class="value">${comment}</td>
                           <td class="value">${formatDate(begin)}</td>
                           <td class="value">${formatDate(end)}</td>
                           <td class="value">${reservation.reference}</td>
                           <td class="value">${reservation.locality}</td>
                          `
+        if (window.GEventChannelName) {
+          let links = html.getElementsByTagName('A')
+          for (let i = 0; i < links.length; i++) {
+            if (links[i].dataset && links[i].dataset.reservationUid) {
+              links[i].addEventListener('click', (event) => {
+                event.preventDefault()
+                window.GEvent('reservation.open', {id: event.target.dataset.reservationUid})
+              })
+            }
+          }
+        }
         window.requestAnimationFrame(() => timeline[when].lastElementChild.appendChild(html))
       }
     })
