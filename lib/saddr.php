@@ -1009,23 +1009,36 @@ function saddr_arrayMerge(&$dest, $src)
  */
 function saddr_urlEncrypt(&$saddr, $url)
 {
-   $cihper=saddr_getEncCipher($saddr);
-   $mode=saddr_getEncMode($saddr);
-   $pass=saddr_getEncPass($saddr);
-
-   $enc_val=mcrypt_encrypt($cihper, $pass, $url, $mode);
-   return rawurlencode(base64_encode($enc_val));
+  $mode=saddr_getEncMode($saddr);
+  $pass=saddr_getEncPass($saddr);
+  
+  if (function_exists('mcrypt_encrypt')) {
+    $cihper=saddr_getEncCipher($saddr);
+    $enc_val = mcrypt_encrypt($cihper, $pass, $url, $mode);
+  } else {
+    $ivlen = openssl_cipher_iv_length('AES-128-CBC');
+    $iv = openssl_random_pseudo_bytes($ivlen);  
+    $enc_val = $iv . openssl_encrypt($url, 'AES-128-CBC', $pass, OPENSSL_RAW_DATA, $iv);
+  }
+  return rawurlencode(base64_encode($enc_val));
 }
 
 function saddr_urlDecrypt(&$saddr, $url)
 {
-   $cihper=saddr_getEncCipher($saddr);
-   $mode=saddr_getEncMode($saddr);
-   $pass=saddr_getEncPass($saddr);
-
-   $enc_val=base64_decode(rawurldecode($url));
-   $url=mcrypt_decrypt($cihper, $pass, $enc_val, $mode);
-   return trim($url);
+  $mode=saddr_getEncMode($saddr);
+  $pass=saddr_getEncPass($saddr);
+  
+  $enc_val=base64_decode(rawurldecode($url));
+  if (function_exists('mcrypt_encrypt')) { // same as above
+    $cihper=saddr_getEncCipher($saddr);
+    $url=mcrypt_decrypt($cihper, $pass, $enc_val, $mode);
+  } else {
+    $ivlen = openssl_cipher_iv_length('AES-128-CBC');
+    $iv = substr($env_val, 0, $ivlen);
+    $ciphertext = substr($enc_val, $ivlen);
+    $url = openssl_decrypt($ciphertext, 'AES-128-CBC', $pass, OPENSSL_RAW_DATA, $iv);
+  }
+  return trim($url);
 }
 
 function saddr_setEncCipher(&$saddr, $cipher)
@@ -1039,6 +1052,9 @@ function saddr_getEncCipher(&$saddr)
    if(isset($saddr['enc']['cipher'])) {
       return $saddr['enc']['cihper'];
    } else {
+      if (!defined('MCRYPT_RIJNDAEL_256')) {
+      	define('MCRYPT_RIJNDAEL_256', 0);
+      }
       return MCRYPT_RIJNDAEL_256;
    }
 }
@@ -1054,6 +1070,9 @@ function saddr_getEncMode(&$saddr)
    if(isset($saddr['enc']['mode'])) {
       return $saddr['enc']['mode'];
    } else {
+      if (!defined('MCRYPT_MODE_ECB')) {
+         define('MCRYPT_MODE_ECB', 0);
+      }
       return MCRYPT_MODE_ECB;
    }
 }
