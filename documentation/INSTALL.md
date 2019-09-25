@@ -43,10 +43,11 @@ Add smarty configuration schema with
 $ ldapadd $AUTHOPTIONS -f $SADDRROOT/documentation/schema/saddr.ldif
 ```
 
-Add iroAddiontalUserInfo.ldif which is add objectclass created for an institute long time ago (that works with Mozilla Thunderbird)
+Add iroAddiontalUserInfo.ldif and ldapab.ldif which is add objectclass created for an institute long time ago (that works with Mozilla Thunderbird)
 
 ```sh
 $ ldapadd $AUTHOPTIONS -f $SADDRROOT/documentation/schema/iroAdditionalUserInfo.ldif
+$ ldapadd $AUTHOPTIONS -f $SADDRROOT/documentation/schema/ldapab.ldif
 ```
 
 Create an object, wherever you want in your tree, saddrConfiguration with, at least :
