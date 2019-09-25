@@ -1034,7 +1034,7 @@ function saddr_urlDecrypt(&$saddr, $url)
     $url=mcrypt_decrypt($cihper, $pass, $enc_val, $mode);
   } else {
     $ivlen = openssl_cipher_iv_length('AES-128-CBC');
-    $iv = substr($env_val, 0, $ivlen);
+    $iv = substr($enc_val, 0, $ivlen);
     $ciphertext = substr($enc_val, $ivlen);
     $url = openssl_decrypt($ciphertext, 'AES-128-CBC', $pass, OPENSSL_RAW_DATA, $iv);
   }
