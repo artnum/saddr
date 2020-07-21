@@ -753,13 +753,16 @@ function saddr_makeSmartyEntry(&$saddr, $ldap_entry)
                            }
                         }
                      }
-                     if(!isset($smarty_entry[$att]) ||
-                           !is_array($smarty_entry[$att])) {
-                        if (is_string($smarty_entry[$att])) {
-                           $smarty_entry[$att] = array($smarty_entry[$att]);
-                        } else {
-                           $smarty_entry[$att] = array();
+                     if(isset($smarty_entry[$att])) {
+                        if(!is_array($smarty_entry[$att])) {
+                           if (is_string($smarty_entry[$att])) {
+                              $smarty_entry[$att] = array($smarty_entry[$att]);
+                           } else {
+                              $smarty_entry[$att] = array();
+                           }
                         }
+                     } else {
+                        $smarty_entry[$att] = array();
                      }
                      for($i=0;$i<$ldap_entry[$ldap_attr]['count'];$i++) {
                         if(!in_array($ldap_entry[$ldap_attr][$i],
@@ -792,7 +795,11 @@ function saddr_getTempDir(&$saddr)
       if(empty($tmp)) {
          $tmp='/tmp/';
       }
-      if(!mkdir($tmp.'/saddr-tmp/')) {
+      if(!is_dir($tmp.'/saddr-tmp/')) {
+         if (@mkdir($tmp.'/saddr-tmp/') ){
+            $tmp=$tmp.'/saddr-tmp/';
+         }
+      } else {
          $tmp=$tmp.'/saddr-tmp/';
       }
 
