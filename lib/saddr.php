@@ -216,7 +216,12 @@ function saddr_getDijitThemeName(&$saddr)
 
 function saddr_getDefaultModuleName(&$saddr)
 {
-   return $saddr['module']['default'];
+   if (isset($saddr['module'])) {
+      if (isset($saddr['module']['default'])) {
+         return $saddr['module']['default'];
+      }
+   }
+   return '';
 }
 
 function saddr_setDefaultModuleName(&$saddr, $name)
@@ -448,7 +453,6 @@ function saddr_getFromFunction(&$saddr, $type, $func, $params=array())
    $ret=NULL;
    if(!empty($type) && is_string($type)) {
       $type=strtolower($type);
-     
       if(isset($saddr['functions']['modules'][$type]) &&
             isset($saddr['functions']['modules'][$type][$func]) &&
             function_exists($saddr['functions']['modules'][$type][$func])) {
@@ -485,6 +489,10 @@ function saddr_getTemplates(&$saddr, $type)
 function saddr_getRdnAttributes(&$saddr, $type)
 {
    return saddr_getFromFunction($saddr, $type, 'getRdnAttributes');
+}
+
+function saddr_getHashGeneratedAttributes(&$saddr, $type) {
+   return saddr_getFromFunction($saddr, $type, 'getHashGeneratedAttributes');
 }
 
 function saddr_getAttributesCombination(&$saddr, $type)
@@ -1021,13 +1029,13 @@ function saddr_urlEncrypt(&$saddr, $url)
   
   if (function_exists('mcrypt_encrypt')) {
     $cihper=saddr_getEncCipher($saddr);
-    $enc_val = mcrypt_encrypt($cihper, $pass, $url, $mode);
+    $enc_val = base64_encode(mcrypt_encrypt($cihper, $pass, $url, $mode));
   } else {
     $ivlen = openssl_cipher_iv_length('AES-128-CBC');
-    $iv = openssl_random_pseudo_bytes($ivlen);  
-    $enc_val = $iv . openssl_encrypt($url, 'AES-128-CBC', $pass, OPENSSL_RAW_DATA, $iv);
+    $iv = openssl_random_pseudo_bytes($ivlen);
+    $enc_val = base64_encode($iv) . ':' . base64_encode(openssl_encrypt($url, 'AES-128-CBC', str_pad(substr($pass, 0, 16), 16, '.'), OPENSSL_RAW_DATA, $iv));
   }
-  return rawurlencode(base64_encode($enc_val));
+  return rawurlencode($enc_val);
 }
 
 function saddr_urlDecrypt(&$saddr, $url)
@@ -1035,15 +1043,18 @@ function saddr_urlDecrypt(&$saddr, $url)
   $mode=saddr_getEncMode($saddr);
   $pass=saddr_getEncPass($saddr);
   
-  $enc_val=base64_decode(rawurldecode($url));
+  $enc_val = rawurldecode($url);
+  $url = '';
   if (function_exists('mcrypt_encrypt')) { // same as above
     $cihper=saddr_getEncCipher($saddr);
-    $url=mcrypt_decrypt($cihper, $pass, $enc_val, $mode);
+    $url=mcrypt_decrypt($cihper, $pass, base64_decode($enc_val), $mode);
   } else {
+    $ctextIv = explode(':', $enc_val);
     $ivlen = openssl_cipher_iv_length('AES-128-CBC');
-    $iv = substr($enc_val, 0, $ivlen);
-    $ciphertext = substr($enc_val, $ivlen);
-    $url = openssl_decrypt($ciphertext, 'AES-128-CBC', $pass, OPENSSL_RAW_DATA, $iv);
+    $iv = substr(base64_decode($ctextIv[0]), 0, $ivlen);
+    if (count($ctextIv) === 2) {
+      $url = openssl_decrypt(base64_decode($ctextIv[1]), 'AES-128-CBC', str_pad(substr($pass, 0, 16), 16, '.'), OPENSSL_RAW_DATA, $iv);
+    }
   }
   return trim($url);
 }

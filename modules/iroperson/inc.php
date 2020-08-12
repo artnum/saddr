@@ -14,7 +14,8 @@ function ext_saddr_iroperson_get_fn_list()
          'getRdnAttributes'=>'ext_iroperson_getRdnAttributes',
          'getAttributesCombination'=>'ext_iroperson_getAttributesCombination',
          'processAttributes'=>'ext_iroperson_processAttributes',
-         'getAttrsGroup'=>'ext_iroperson_getAttrsGroup'
+         'getAttrsGroup'=>'ext_iroperson_getAttrsGroup',
+         'getHashGeneratedAttributes' => 'ext_iroperson_getHashGeneratedAttributes'
          );
 }
 
@@ -53,7 +54,8 @@ function ext_iroperson_getAttrs()
       'irobankaccount'=>'iban',
       'irobankestablishment'=>'bank',
       'birthday'=>'birthday',
-      'jpegphoto'=>'picture'
+      'jpegphoto'=>'picture',
+      'businesscategory' => 'business'
       );
 }
 
@@ -89,10 +91,11 @@ function ext_iroperson_getTemplates()
 
 function ext_iroperson_getRdnAttributes()
 {
-   return array('principal'=>'cn',
-         'multi'=>array('mail', 'telephonenumber', 'mobile', 
-            'facsimiletelephonenumber', 'o', 'l', 'st', 'c')
-         );
+   return array('principal'=>'uid');
+}
+
+function ext_iroperson_getHashGeneratedAttributes() {
+   return ['uid'];
 }
 
 function ext_iroperson_getAttributesCombination()

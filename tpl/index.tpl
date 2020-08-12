@@ -8,10 +8,12 @@
   <script src="conf/app.js"></script>
   <script src="js/gevent.js"></script>
   <script src="js/location.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.1/dojo/dojo.js" data-dojo-config="parseOnLoad: true"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/dojo/1.14.1/dojo/dojo.js" data-dojo-config="parseOnLoad: true"></script>
 <script>
+ dojo.require('dojo._base.declare')
  dojo.require('dijit.form.Form');
  dojo.require('dijit.form.TextBox');
+ dojo.require('dojo.date.locale')
  dojo.require('dijit.form.NumberTextBox');
  dojo.require('dijit.form.Textarea');
  dojo.require('dijit.form.DateTextBox');
@@ -25,8 +27,8 @@
 </script>
 <title>saddr</title>
 <link rel="stylesheet" href="css/default/default.css" type="text/css" />
-<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.8.1/dojo/resources/dojo.css" />
-<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.8.1/dijit/themes/claro/claro.css" />
+<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.14.1/dojo/resources/dojo.css" />
+<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.14.1/dijit/themes/claro/claro.css" />
 </head>
 <body class="{saddr_dijit_theme_name}">
 {include file="header.tpl"}

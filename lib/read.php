@@ -20,7 +20,7 @@ function saddr_read(&$saddr, $dn, $attrs=array(), $deepness=0)
 
    $ldap=saddr_getLdap($saddr);
    if($ldap!=NULL && $ldap!=FALSE) {
-      $r_res=ldap_read($ldap, $dn, '(objectclass=*)', $ldap_attrs);
+      $r_res=@ldap_read($ldap, $dn, '(objectclass=*)', $ldap_attrs);
       if($r_res) {
          $e=ldap_get_entries($ldap, $r_res);
          if($e && $e['count']==1) {

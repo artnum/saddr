@@ -12,7 +12,8 @@ function ext_saddr_iroorganization_get_fn_list()
          'getAttrs'=>'ext_iroorganization_getAttrs',
          'getTemplates'=>'ext_iroorganization_getTemplates',
          'getRdnAttributes'=>'ext_iroorganization_getRdnAttributes',
-         'processAttributes'=>'ext_iroorganization_processAttributes'
+         'processAttributes'=>'ext_iroorganization_processAttributes',
+         'getHashGeneratedAttributes' => 'ext_iroorganization_getHashGeneratedAttributes'
          );
 }
 
@@ -36,15 +37,14 @@ function ext_iroorganization_getAttrs()
       'custom2'=>'tags',
       'custom3'=>'tags',
       'custom4'=>'work_mobile',
-      'description'=>'description'
+      'description'=>'description',
+      'businesscategory' => 'business'
       );
 }
 
 function ext_iroorganization_getRdnAttributes()
 {
-   return array('principal'=>'o',
-         'multi'=>array('mail', 'physicaldeliveryofficename',
-            'businesscategory', 'st', 'l', 'c'));
+   return array('principal'=>'uid');
 }
 
 function ext_iroorganization_getClass()
@@ -85,5 +85,10 @@ function ext_iroorganization_processAttributes($attribute, $values)
    }
    return FALSE;
 }
+
+function ext_iroorganization_getHashGeneratedAttributes() {
+   return ['uid'];
+}
+
 
 ?>

@@ -260,9 +260,10 @@ function s2s_displaySmartyEntry($params, $smarty)
          default:
          case 'textbox': $type=array('dijitTextBox', 'dijit.form.TextBox'); 
                          break;
-         case 'phone': $type = array('dijitTextBox', 'dijit.form.TextBox', 'tel:'); break;                        case 'textarea': $type=array('dijitTextArea', 'dijit.form.Textarea');
+         case 'phone': $type = array('dijitTextBox', 'dijit.form.TextBox', 'tel:'); break;                        
+         case 'textarea': $type=array('dijitTextArea', 'dijit.form.Textarea');
                           break;
-         case 'date': $type=array('dijitDateTextBox', 'dijit.form.DateTextBox');
+         case 'date': $type=array('dijitDateTextBox', 'dijit.form.TextBox');
                       break;
          case 'tag': $type=array('saddrTagsArea', 'dijit.form.Textarea'); break;
          case 'sselect': $type=array('saddrSelect',
@@ -318,7 +319,7 @@ function s2s_displaySmartyEntry($params, $smarty)
          case 'dijitDateTextBox':
          case 'dijitTextBox':
             foreach($v_entry as $v) {
-               $html.='<input type="textbox" name="'.$name.'" '.
+               $html.='<input type="text" name="'.$name.'" '.
                   'value="'.$v.'" '.
                   $required.' '.
                   'class="saddr_value saddr_textbox" '.
@@ -380,8 +381,7 @@ function s2s_displaySmartyEntry($params, $smarty)
             }
             break;
          case 'saddrJpegImage':
-            $html.='<input type="file" multiple="false" name="'.$name.'" data-dojo-type="'.
-               $type[1].'" label="Image to upload" />';
+            $html.='<input type="file" multiple="false" name="'.$name.'" label="Image to upload" />';
             break;
       }
    } else {
@@ -486,7 +486,9 @@ function s2s_displaySmartyEntry($params, $smarty)
          case 'saddrJpegImage':
                $img_data = saddr_fixImageSize($saddr['handle'],
                      $entry[$params['e']][0], 300, 80);
-               $html.='<img src="data:image/jpeg;base64,'.base64_encode($img_data).'" name="'.$name.'" />';
+               if ($img_data !== null) {
+                  $html.='<img src="data:image/jpeg;base64,'.base64_encode($img_data).'" />';
+               }
             break;
       }
    }

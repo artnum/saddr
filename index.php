@@ -228,7 +228,7 @@ if(isset($_GET['op'])) {
                      array('tags', 'restricted_tags'));
                $saddr_results['op']=$_GET['op'];
                /* Reencrypt or you experience some troubles with the browser */
-               $saddr_results['search']=saddr_urlEncrypt($saddr, 
+               $saddr_results['search']=saddr_urlEncrypt($Saddr, 
                      $search_string);
                $saddr_results['display']='results.tpl';
                if(!empty($search)) {
@@ -250,7 +250,7 @@ if(isset($_GET['op'])) {
                      array(), $search_op);
                $saddr_results['op']=$_GET['op'];
                /* Reencrypt or you experience some troubles with the browser */
-               $saddr_results['search']=saddr_urlEncrypt($saddr, 
+               $saddr_results['search']=saddr_urlEncrypt($Saddr, 
                      $search_string);
                $saddr_results['display']='results.tpl';
                if(!empty($search)) {
@@ -275,7 +275,7 @@ if(isset($_GET['op'])) {
                      array(), $search_op);
                $saddr_results['op']=$_GET['op'];
                /* Reencrypt or you experience some troubles with the browser */
-               $saddr_results['search']=saddr_urlEncrypt($saddr, 
+               $saddr_results['search']=saddr_urlEncrypt($Saddr, 
                      $search_string);
                $saddr_results['display']='results.tpl';
                if(!empty($search)) {
@@ -286,6 +286,7 @@ if(isset($_GET['op'])) {
          break;
       case 'doAddOrEdit':
          $smarty_entry=array();
+
          foreach($_POST as $k=>$v) {
             if(!empty($v) && is_string($v) && $v!='') {
                $smarty_entry[$k]=$v;
@@ -301,12 +302,12 @@ if(isset($_GET['op'])) {
          }
          foreach($_FILES as $k=>$v) {
             /* Dojo uploader add a 's' at the end of the field name !!! */
-            if($k{strlen($k)-1} == 's') {
+            if($k[strlen($k)-1] == 's') {
                $key = substr($k, 0, strlen($k)-1);
             } else {
                $key = $k;
             }
-            if(count($v['name']) == 1) {
+            if(!empty($v['tmp_name'])) {
                if($v['error'][0]==UPLOAD_ERR_OK) {
                   $smarty_entry[$key]=file_get_contents($v['tmp_name']);
                }
@@ -314,7 +315,7 @@ if(isset($_GET['op'])) {
          }
 
          if(isset($smarty_entry['id']) && is_string($smarty_entry['id'])) {
-            $dn=saddr_urlDecrypt($saddr, $smarty_entry['id']);
+            $dn=saddr_urlDecrypt($Saddr, $smarty_entry['id']);
             $smarty_entry['dn']=$dn;    
             $ret=saddr_modify($Saddr, $smarty_entry);
             if($ret[1]) {
@@ -341,7 +342,7 @@ if(isset($_GET['op'])) {
                $saddr_results['display']=saddr_getModuleDirectory($Saddr).'/'.
                   $entry['module'].'/'.$tpl['view'];
                $saddr_results['search_results']=$entry;
-               $saddr_results['__delete']=saddr_urlEncrypt($saddr, 
+               $saddr_results['__delete']=saddr_urlEncrypt($Saddr, 
                      time() . " $dn");
             }
          }
@@ -358,7 +359,7 @@ if(isset($_GET['op'])) {
             $saddr_results['display']=saddr_getModuleDirectory($Saddr).'/'.
                $entry['module'].'/'.$tpl['view'];
             $saddr_results['search_results']=$entry;
-            $saddr_results['__delete']=saddr_urlEncrypt($saddr, 
+            $saddr_results['__delete']=saddr_urlEncrypt($Saddr, 
                   time() . " $dn");
             if(saddr_isIDSelected($Saddr, $dn)) {
                $saddr_results['__selected']=TRUE;
@@ -395,7 +396,7 @@ if(isset($_GET['op'])) {
             $entry['__edit']=TRUE;
             if(!empty($entry)) {
                $saddr_results['search_results']=$entry;
-               $saddr_results['__delete']=saddr_urlEncrypt($saddr, 
+               $saddr_results['__delete']=saddr_urlEncrypt($Saddr, 
                      time() . " $dn");
                if(saddr_isIDSelected($Saddr, $dn)) {
                   $saddr_results['__selected']=TRUE;
@@ -425,7 +426,7 @@ if(isset($_GET['op'])) {
          /* no break */
       case 'delete':
          if(isset($_GET['timed_id'])) {
-            $tid=saddr_urlDecrypt($saddr, $_GET['timed_id']);
+            $tid=saddr_urlDecrypt($Saddr, $_GET['timed_id']);
             if(is_string($tid)) {
                $time_id=explode(' ', $tid, 2);
                if(is_numeric($time_id[0])) {
@@ -435,7 +436,7 @@ if(isset($_GET['op'])) {
                            $entry=saddr_read($Saddr, $time_id[1]);
                            if(!empty($entry)) {
                               $saddr_results['__delete']=saddr_urlEncrypt(
-                                    $saddr, time() . " ". $time_id[1]);
+                                    $Saddr, time() . " ". $time_id[1]);
                               $saddr_results['search_results']=$entry;
                               $saddr_results['display']='delete.tpl';
                            }

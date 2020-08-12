@@ -22,6 +22,31 @@ function saddr_add(&$saddr, $smarty_entry)
       }
 
       if(!empty($ldap_entry)) {
+         $hAttr = saddr_getHashGeneratedAttributes($saddr, $smarty_entry['module']);
+         if ($hAttr) {
+            $ctx = hash_init('sha256');
+            hash_update($ctx, time());
+            foreach($ldap_entry as $k => $v) {
+               hash_update($ctx, $k);
+               if(is_string($v)) {
+                  hash_update($ctx, $v);
+               } else {
+                  foreach($v as $_v) {
+                     if (is_string($_v)) {
+                        hash_update($ctx, $_v);
+                     }
+                  }
+               }
+            }
+       
+            $hash = hash_final($ctx);
+            if (is_string($hAttr)) {
+               $hAttr = [$hAttr];
+            }
+            foreach ($hAttr as $attr) {
+               $ldap_entry[$attr] = [$hash];
+            }
+         }
          $rdn_attrs=saddr_getRdnAttributes($saddr, $smarty_entry['module']);
          if(isset($rdn_attrs['principal']) &&
                is_string($rdn_attrs['principal'])) {
@@ -47,23 +72,7 @@ function saddr_add(&$saddr, $smarty_entry)
                }
 
                if($dn!='') {
-                  $ctx = hash_init('sha256');
-                  hash_update($ctx, time());
-                  foreach($ldap_entry as $k => $v) {
-                     hash_update($ctx, $k);
-                     if(is_string($v)) {
-                        hash_update($ctx, $v);
-                     } else {
-                        foreach($v as $_v) {
-                           if (is_string($_v)) {
-                              hash_update($ctx, $v);
-                           }
-                        }
-                     }
-                  }
-                  $ldap_entry['uid'] = array(hash_final($ctx));
-                  $dn = 'uid='.$ldap_entry['uid'][0].','.$bases[0];
-                  $ret=array($dn, ldap_add(saddr_getLdap($saddr), $dn,
+                  $ret=array($dn, @ldap_add(saddr_getLdap($saddr), $dn,
                            $ldap_entry));
                   if(! $ret[0]) {
                      $entry = '-- Error addition failed' . "\n";

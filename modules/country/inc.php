@@ -18,6 +18,7 @@ function ext_saddr_country_get_fn_list()
 function ext_country_getAttrs()
 {
    return array(
+      'businesscategory' => 'uniqueidentifier',
       'c'=>array('code', '_saddr_res1'),
       'description'=>array('name', '_saddr_res0'),
       );

@@ -8,7 +8,6 @@
 function saddr_modify(&$saddr, $smarty_entry)
 {
    $ret=array('', FALSE);
-
    if(!empty($smarty_entry) && isset($smarty_entry['module']) &&
             is_string($smarty_entry['module']) && isset($smarty_entry['dn']) &&
             is_string($smarty_entry['dn'])) {
@@ -76,21 +75,21 @@ function saddr_modify(&$saddr, $smarty_entry)
             $op_success=TRUE;
             foreach($ldap_entry as $attr=>$val) {
                if(!isset($ldap_old[$attr])) {
-                  $op_success=ldap_mod_add(saddr_getLdap($saddr), $dn,
+                  $op_success=@ldap_mod_add(saddr_getLdap($saddr), $dn,
                         array($attr=>$val));
                }
             }
 
             foreach($ldap_old as $attr=>$val) {
                if(!isset($ldap_entry[$attr])) {
-                  $_op_success=ldap_mod_del(saddr_getLdap($saddr), $dn,
+                  $_op_success=@ldap_mod_del(saddr_getLdap($saddr), $dn,
                         array($attr=>array()));
                   if(!$_op_success) {
                      $op_success=FALSE;
                   }
                } else {
                   if(count($val)!=count($ldap_entry[$attr])) {
-                     $_op_success=ldap_mod_replace(saddr_getLdap($saddr), $dn,
+                     $_op_success=@ldap_mod_replace(saddr_getLdap($saddr), $dn,
                            array($attr=>$ldap_entry[$attr]));
                      if(!$_op_success) {
                         $op_success=FALSE;
@@ -104,7 +103,7 @@ function saddr_modify(&$saddr, $smarty_entry)
                         }
                      }
                      if($modify) {
-                        $_op_success=ldap_mod_replace(saddr_getLdap($saddr), 
+                        $_op_success=@ldap_mod_replace(saddr_getLdap($saddr), 
                               $dn, array($attr=>$ldap_entry[$attr]));
                         if(!$_op_success) {
                            $op_success=FALSE;
@@ -121,7 +120,7 @@ function saddr_modify(&$saddr, $smarty_entry)
          } else {
             $ret=saddr_add($saddr, $smarty_entry);
             if($ret[1]) {
-               ldap_delete(saddr_getLdap($saddr), $dn);
+               @ldap_delete(saddr_getLdap($saddr), $dn);
             } else {
                $ret[0]=$smarty_entry['dn'];
             }

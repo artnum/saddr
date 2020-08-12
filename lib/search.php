@@ -48,7 +48,7 @@ function saddr_search(&$saddr, $search, $search_on=array(), $attrs=array(),
                   $serverctrls);
                ldap_set_option($ldap, LDAP_OPT_SERVER_CONTROLS, $serverctrls);
             }
-            $s_res=ldap_search($ldap, $base, $ldap_search_filter,
+            $s_res=@ldap_search($ldap, $base, $ldap_search_filter,
                   $ldap_attrs);
             if($s_res) {
 
