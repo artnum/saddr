@@ -1,7 +1,11 @@
 # INSTALL
 
- - Have smarty available as "Smarty/Smarty.class.php"
- - Have ldap installed
+## Require
+
+All available via composer.
+
+- smarty/smarty at version 3.1.33 (version above are buggy and recurse up to fs root to cleanup compiled file)
+- artnum/ldap-helper, a set of class to handle LDAP. 
 
 ## Web
 
