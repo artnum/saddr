@@ -1,10 +1,9 @@
 <?PHP
-/* (c) 2012 Etienne Bagnoud
+/* (c) 2012-2020 Etienne Bagnoud <etienne@artnum.ch>
    This file is part of saddr project. saddr is under the MIT license.
 
    See LICENSE file
  */
-
 function saddr_read(&$saddr, $dn, $attrs=array(), $deepness=0)
 {
    $ret=FALSE;
@@ -20,11 +19,11 @@ function saddr_read(&$saddr, $dn, $attrs=array(), $deepness=0)
 
    $ldap=saddr_getLdap($saddr);
    if($ldap!=NULL && $ldap!=FALSE) {
-      $r_res=@ldap_read($ldap, $dn, '(objectclass=*)', $ldap_attrs);
-      if($r_res) {
-         $e=ldap_get_entries($ldap, $r_res);
-         if($e && $e['count']==1) {
-            $ret=saddr_makeSmartyEntry($saddr, $e[0]);
+      $results = $ldap->search($dn, '(objectclass=*)', $ldap_attrs, 'base');
+      foreach ($results as $rset) {
+         if ($rset->count() > 0) {
+         $entry = $rset->firstEntry();
+            $ret=saddr_makeSmartyEntry($saddr, $entry);
             if($deepness>0) {
                if(isset($ret['seealso'])) {
                   $deepness--;

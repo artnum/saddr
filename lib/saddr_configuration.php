@@ -1,105 +1,73 @@
 <?PHP
+/* (c) 2012-2020 Etienne Bagnoud <etienne@artnum.ch>
+   This file is part of saddr project. saddr is under the MIT license.
 
-function _saddr_mainConfEntryToConf(&$saddr, $ldap, $entry) 
+   See LICENSE file
+ */
+
+function _saddr_mainConfEntryToConf(&$saddr, $entry) 
 {
-   $ret=FALSE;
-   $ber=NULL;
-   for(
-         /* $ber is not needed */
-         $attr=ldap_first_attribute($ldap, $entry, $ber);
-         $attr!=FALSE;
-         $attr=ldap_next_attribute($ldap, $entry, $ber)
-      ) {
-
-      $value=ldap_get_values($ldap, $entry, $attr);
-      if($value && $value['count']>0) {
-         switch(strtolower($attr)) {
-            /* Directory server enforce needed value if the right schema is used
-             */
-            case 'saddrbase':
-               for($i=0;$i<$value['count'];$i++) {
-                  saddr_setLdapBase($saddr, $value[$i]);
-                  $ret=TRUE;
-               }
-               break;
-            case 'saddrdojowebpath':
-               saddr_setJsDojoPath($saddr, $value[0]);
-               break;
-            case 'saddrdijitthemewebpath':
-               saddr_setDijitThemePath($saddr, $value[0]);
-               break;
-            case 'saddrdijitthemename':
-               saddr_setDijitThemeName($saddr, $value[0]);
-               break;
-            case 'saddrmodules':
-               for($i=0;$i<$value['count'];$i++) {
-                  saddr_loadModuleConfiguration($saddr, $value[$i]);
-               }
-               break;
-         }
+   foreach($entry->eachAttribute() as $attr => $value) {
+      switch(strtolower($attr)) {
+         /* Directory server enforce needed value if the right schema is used
+            */
+         case 'saddrbase':
+            for($i = 0; $i < count($value); $i++) {
+               saddr_setLdapBase($saddr, $value[$i]);
+               $ret=TRUE;
+            }
+            break;
+         case 'saddrdojowebpath':
+            saddr_setJsDojoPath($saddr, $value[0]);
+            break;
+         case 'saddrdijitthemewebpath':
+            saddr_setDijitThemePath($saddr, $value[0]);
+            break;
+         case 'saddrdijitthemename':
+            saddr_setDijitThemeName($saddr, $value[0]);
+            break;
+         case 'saddrmodules':
+            for($i = 0; $i < count($value); $i++) {
+               saddr_loadModuleConfiguration($saddr, $value[$i]);
+            }
+            break;
       }
    }
 
-   return $ret;
+   return true;
 }
 
 function saddr_loadModuleConfiguration(&$saddr, $dn)
 {
-   $ret=FALSE;
-
-   $ldap=saddr_getLdap($saddr);
+   $ldap = saddr_getLdap($saddr);
    if($ldap) {
-      $res=ldap_read($ldap, $dn, '(objectclass=saddrModuleConfiguration)');
-      if($res) {
-         $entry=ldap_first_entry($ldap, $res);
-         if($entry) {
-            $module=array(
-                  'name' => NULL,
-                  'path' => NULL,
-                  'human_name' => NULL,
-                  'base' => NULL
-                  );
-
-            $dn=ldap_get_dn($ldap, $entry);
-            for(
-                  $attr=ldap_first_attribute($ldap, $entry);
-                  $attr!=FALSE;
-                  $attr=ldap_next_attribute($ldap, $entry)
-               ) {
-
-               $value=ldap_get_values($ldap, $entry, $attr);
-               if($value && $value['count']>0) {
-                  switch(strtolower($attr)) {
-                     case 'saddrconfigname':
-                        $module['name']=$value[0];
-                        break;
-                     case 'saddrmodulepath':
-                        $module['path']=$value[0];
-                        break;
-                     case 'saddrmodulename':
-                        $module['human_name']=$value[0];
-                        break;
-                     case 'saddrbase':
-                        $module['base']=$value[0];
-                        break;
-                  }
-               }
-            }
+      $res = $ldap->search($dn, '(objectclass=saddrModuleConfiguration)', ['*'], 'base');
+      foreach($res as $result) {
+         for($entry = $result->firstEntry(); $entry; $entry = $result->nextEntry()) {
+            $name = $entry->get('saddrconfigname');
+            $hname = $entry->get('saddrmodulename');
+            $path = $entry->get('saddrmodulepath');
             
+            $base = $entry->get('saddrbase');
+            $module = [
+                  'name' => $name ? $name[0] : null,
+                  'path' => $path ? $path[0] : null,
+                  'human_name' => $hname ? $hname[0] : null,
+                  'base' => $base ? $base : saddr_getLdapBase($saddr)
+               ];
+               
             if(!is_null($module['name']) && !is_null($module['path'])) {
                if(saddr_addModule($saddr, $module['name'], $module['path'],
-                  $dn, $module['human_name'])) {
+                  $entry->dn(), $module['human_name'])) {
                   if(!is_null($module['base'])) {
                      saddr_setModuleBase($saddr, $module['name'],
                            $module['base']);
                   }
-                  $ret=TRUE;
                }
             }
          }
       }
    }
-
    return TRUE;
 }
 
@@ -115,18 +83,21 @@ function saddr_loadMainConfiguration(&$saddr)
       if(is_null($dn=saddr_getConfigurationDn($saddr))) {
          saddr_findNamingContext($saddr);
       }
-      if(is_null($dn)) $dn=saddr_getConfigurationDn($saddr);
-
+      if(is_null($dn)) { $dn = saddr_getConfigurationDn($saddr); }
+      
       $filter='(objectclass=saddrConfiguration)';
-      if(!is_null($dn)) {
-         $s_res=ldap_read($ldap, $dn, $filter);
-         if($s_res && ldap_count_entries($ldap, $s_res)==1) {
-            $entry=ldap_first_entry($ldap, $s_res);
+      $entry = null;
+      if($dn) {
+         $s_res = $ldap->search($dn, $filter, ['*'], 'base');
+         foreach ($s_res as $result) {
+            if($result->count() === 1) {
+               $entry = $result->firstEntry();
+            }
          }
       } 
-      if(isset($entry)) {
-         saddr_setConfigurationDn($saddr, ldap_get_dn($ldap, $entry));
-         $ret=_saddr_mainConfEntryToConf($saddr, $ldap, $entry);
+      if($entry) {
+         saddr_setConfigurationDn($saddr, $entry->dn());
+         $ret = _saddr_mainConfEntryToConf($saddr, $entry);
       }
    }
 
@@ -135,7 +106,6 @@ function saddr_loadMainConfiguration(&$saddr)
 
 function saddr_findNamingContext(&$saddr)
 {
-   $ret=FALSE;
    $filter='(objectclass=saddrConfiguration)';
 
    /* If conf and naming context has already been found, don't search again
@@ -143,34 +113,20 @@ function saddr_findNamingContext(&$saddr)
    if(saddr_getNamingContext($saddr)!=NULL &&
          saddr_getConfigurationDn($saddr)!=NULL) return TRUE;
 
-   $ldap=saddr_getLdap($saddr);
-   if($ldap) {
-      $rootDSE=saddr_getLdapRootDse($saddr);
-      if(! $rootDSE) {
-         $rootDSE=tch_getRootDSE($ldap);
-         if($rootDSE) {
-            saddr_setLdapRootDse($saddr, $rootDSE);
-         }
-      }
-      /* rootDSE might be set now */
-      if($rootDSE) {
-         $bases=tch_getLdapBases($ldap, $rootDSE);
-         foreach($bases as $base) {
-            $s_res=ldap_search($ldap, $base, $filter);
-            if($s_res) {
-               /* We handle only one configuration, this might change */
-               if(ldap_count_entries($ldap, $s_res) > 0) {
-                  $entry=ldap_first_entry($ldap, $s_res);
-                  saddr_setNamingContext($saddr, $base);
-                  saddr_setConfigurationDn($saddr, ldap_get_dn($ldap, $entry));
-                  $ret=TRUE;
-                  break;
-               }
-            }
+   $ldap = saddr_getLdap($saddr);
+   $ctxs = $ldap->getNamingContexts();
+   foreach ($ctxs as $ctx) {
+      $results = $ldap->search($ctx, $filter, ['*'], 'sub');     
+      foreach ($results as $result) {
+         if ($result->count() > 0) {
+            $entry = $result->firstEntry();
+            saddr_setNamingContext($saddr, $ctx);
+            saddr_setConfigurationDn($saddr, $entry->dn());
+            return true;
          }
       }
    }
-   return $ret;
+   return false;
 }
 
 function saddr_getConfiguredModules(&$saddr)
@@ -185,17 +141,17 @@ function saddr_getConfiguredModules(&$saddr)
       $cdn=saddr_getConfigurationDn($saddr);
       
       if(!is_null($cdn)) {
-         $s_res=ldap_read($ldap, $cdn, $filter, array('saddrModules'));
-         if($s_res) {
-            $entry=ldap_first_entry($ldap, $s_res);
-            if($entry) {
-               $values=ldap_get_attributes($ldap, $entry);
-               if($values && isset($values['saddrModules'])) {
-                  for($i=0;$i<$values['saddrModules']['count'];$i++) {
-                     $modules[]=$values['saddrModules'][$i];
-                  }
+         $s_res = $ldap->search($cdn, $filter, ['saddrModules'], 'base');
+         foreach ($s_res as $result) {
+            if ($result->count() <= 0) { continue; }
+            $entry = $result->firstEntry();
+            
+            if(($value = $entry->get('saddrmodules')) !== null) {
+               for($i = 0; $i < count($value); $i++) {
+                  $modules[] = $value[$i];
                }
             }
+            
          }
       }
    }
@@ -217,33 +173,19 @@ function saddr_getAvailableModules(&$saddr)
       $nctx=saddr_getNamingContext($saddr);
 
       if(!is_null($nctx)) {
-         $s_res=ldap_search($ldap, $nctx, $filter,
-               array('saddrModuleName', 'saddrConfigName'));
-         if($s_res) {
-            for(
-                  $e=ldap_first_entry($ldap, $s_res);
-                  $e!=FALSE;
-                  $e=ldap_next_entry($ldap, $e)) {
+         $s_res = $ldap->search($nctx, $filter, ['saddrModuleName', 'saddrConfigName'], 'sub');
+         foreach ($s_res as $result) {
+            for($e = $result->firstEntry(); $e; $e = $result->nextEntry()) {
+               $confname = $e->get('saddrconfigname');
+               $name = $e->get('saddrmodulname');
+
+               $module = [
+                  'module' => $confname ? $confname[0] : null, 
+                  'name' => $name ? $name[0] : null, 
+                  'dn' => $e->dn()
+               ];
                
-               $module=array('module'=>NULL, 'name'=>NULL, 'dn'=>NULL);
-               for(
-                     $attr=ldap_first_attribute($ldap, $e);
-                     $attr!=FALSE;
-                     $attr=ldap_next_attribute($ldap, $e)) {
-                  $value=ldap_get_values($ldap, $e, $attr);
-                  if($value && $value['count']>0) {
-                     $module['dn']=ldap_get_dn($ldap, $e);
-                     switch(strtolower($attr)) {
-                        case 'saddrmodulename':
-                           $module['name']=$value[0];
-                           break;
-                        case 'saddrconfigname':
-                           $module['module']=$value[0];
-                           break;
-                     }
-                  }
-               } 
-               if(is_null($module['name'])) $module['name']=$module['module'];
+               if(is_null($module['name'])) { $module['name']=$module['module']; }
                $modules[]=$module;
             }
          }

@@ -1,5 +1,5 @@
 <?PHP
-/* (c) 2012 Etienne Bagnoud
+/* (c) 2012-2020 Etienne Bagnoud <etienne@artnum.ch>
    This file is part of saddr project. saddr is under the MIT license.
 
    See LICENSE file
@@ -111,15 +111,9 @@ function saddr_getNamingContext(&$saddr)
    return $saddr['namingctx'];
 }
 
-function saddr_setLdapObjectClasses(&$saddr, $oc)
-{
-   $saddr['ldap']['objectclass']=$oc;
-   return TRUE;
-}
-
 function saddr_getLdapObjectClasses(&$saddr)
 {
-   return $saddr['ldap']['objectclass'];
+   return $saddr['ldap']['handle']->getClasses();
 }
 
 function saddr_setLdapRootDse(&$saddr, $rootdse)
@@ -348,7 +342,7 @@ function saddr_addModule(&$saddr, $name, $path, $dn, $human_name=NULL)
          }
       }
    }
-
+   
    return $added;
 }
 
@@ -623,167 +617,181 @@ function saddr_doAttributesCombination(&$saddr, &$ldap_entry, $module)
  */
 function saddr_makeLdapEntry(&$saddr, $smarty_entry)
 {
-   $ret=array();
    $attrs=saddr_getAttrs($saddr, $smarty_entry['module']);
 
-   if(!empty($attrs)) {
-      $ldap_entry=array();
-      foreach($attrs as $attr=>$s_attrs) {
-         if(is_array($s_attrs)) {
-            foreach($s_attrs as $s_attr) {
-               if(substr_compare($s_attr, '_saddr', 0, 6)==0) continue;
-               if(isset($smarty_entry[$s_attr])) {
-                  if(!isset($ldap_entry[$attr])) $ldap_entry[$attr]=array();
-                  if(is_array($smarty_entry[$s_attr])) {
-                     foreach($smarty_entry[$s_attr] as $value) {
-                        $ldap_entry[$attr][]=$value;
-                     }
-                  } else {
-                     $ldap_entry[$attr][]=$smarty_entry[$s_attr];
-                  }
-               }
+   if(empty($attrs)) { return []; }
+
+   $ldap_entry=[];
+   foreach($attrs as $attr=>$s_attrs) {
+      if(is_array($s_attrs)) {
+         foreach($s_attrs as $s_attr) {
+            if(substr_compare($s_attr, '_saddr', 0, 6)==0) continue;
+            if (isset($smarty_entry['-' . $s_attr])) {
+               $ldap_entry['-' . $attr] = true;
+               continue;
             }
-         } else {
-            if(substr_compare($s_attrs, '_saddr', 0, 6)==0) continue;
-            if(isset($smarty_entry[$s_attrs])) {
+            if(isset($smarty_entry[$s_attr])) {
                if(!isset($ldap_entry[$attr])) $ldap_entry[$attr]=array();
-               if(is_array($smarty_entry[$s_attrs])) {
-                  foreach($smarty_entry[$s_attrs] as $value) {
+               if(is_array($smarty_entry[$s_attr])) {
+                  foreach($smarty_entry[$s_attr] as $value) {
                      $ldap_entry[$attr][]=$value;
                   }
                } else {
-                  $ldap_entry[$attr][]=$smarty_entry[$s_attrs];
+                  $ldap_entry[$attr][]=$smarty_entry[$s_attr];
                }
-            }
+            } 
          }
-      }
-  
-      saddr_doAttributesCombination($saddr, $ldap_entry,
-            $smarty_entry['module']);
-
-      $classes=saddr_getClass($saddr, $smarty_entry['module']);
-      if(!empty($classes)) {
-         if(isset($classes['structural']) && is_string($classes['structural'])) {
-            $ldap_entry['objectclass']=array($classes['structural']);
-            if(isset($classes['auxiliary'])) {
-               if(is_array($classes['auxiliary'])) {
-                  foreach($classes['auxiliary'] as $aux) {
-                     $ldap_entry['objectclass'][]=$aux;
-                  }
-               } else {
-                  $ldap_entry['objectclass'][]=$classes['auxiliary'];
+      } else {
+         if(substr_compare($s_attrs, '_saddr', 0, 6)==0) continue;
+         if (isset($smarty_entry['-' . $s_attrs])) {
+            $ldap_entry['-' . $attr] = true;
+            continue;
+         }
+         if(isset($smarty_entry[$s_attrs])) {
+            if(!isset($ldap_entry[$attr])) $ldap_entry[$attr]=array();
+            if(is_array($smarty_entry[$s_attrs])) {
+               foreach($smarty_entry[$s_attrs] as $value) {
+                  $ldap_entry[$attr][]=$value;
                }
+            } else {
+               $ldap_entry[$attr][]=$smarty_entry[$s_attrs];
             }
-            $ret=$ldap_entry;
          }
       }
    }
 
-   return $ret;
+   saddr_doAttributesCombination($saddr, $ldap_entry,
+         $smarty_entry['module']);
+
+   $classes=saddr_getClass($saddr, $smarty_entry['module']);
+   if(!empty($classes)) {
+      if(isset($classes['structural']) && is_string($classes['structural'])) {
+         $ldap_entry['objectclass']=array($classes['structural']);
+         if(isset($classes['auxiliary'])) {
+            if(is_array($classes['auxiliary'])) {
+               foreach($classes['auxiliary'] as $aux) {
+                  $ldap_entry['objectclass'][]=$aux;
+               }
+            } else {
+               $ldap_entry['objectclass'][]=$classes['auxiliary'];
+            }
+         }
+      }
+   }
+
+   return $ldap_entry;
 }
 
 /* Convert a LDAP entry to smarty representation
  */
-function saddr_makeSmartyEntry(&$saddr, $ldap_entry)
+function saddr_makeSmartyEntry(&$saddr, $entry)
 {
-   $smarty_entry=array();
+   $smarty_entry = [];
    
-   if(isset($ldap_entry['objectclass'])) {
-      $modules=array();
-      $r_oc=array();
-      for($i=0;$i<$ldap_entry['objectclass']['count'];$i++) {
-         $oc[]=strtolower($ldap_entry['objectclass'][$i]);
-         $x=saddr_getModuleByObjectClass($saddr, 
-               $ldap_entry['objectclass'][$i]);
-         if($x) $modules[]=$x;
+   $oclass = $entry->get('objectclass');
+   if (!$oclass) { return []; }
+   
+   $modules = [];
+   $oc = [];
+   for ($i = 0; $i < count($oclass); $i++) {
+      $current = strtolower($oclass[$i]);
+      $oc[] = $current;
+      $module = saddr_getModuleByObjectClass($saddr, $current);
+      if ($module) {
+         $modules[] = $module;
       }
-      
-      $module='';
-      if(count($modules)==1) {
-         $module=$modules[0];
-      } else {
-         $last_same_class_count=-1;
-         foreach($modules as $m) {
-            $classes=saddr_getClass($saddr, $m);
-            $flat_classes=array($classes['structural']);
-            foreach($classes['auxiliary'] as $c) $flat_classes[]=$c;
-
-            $same_classes=0;
-            foreach($oc as $c) {
-               if(in_array($c, $flat_classes)) $same_classes++;
-            }
-            if($same_classes>$last_same_class_count) {
-               $last_same_class_count=$same_classes;
-               $module=$m;
-            }
-         }
-
-      }
-
-      if($module) {
-         $has_groups=FALSE;
-         $attrs=saddr_getAttrs($saddr, $module);
-         $attrs_group=saddr_getAttrsGroup($saddr, $module);
-         $has_group=FALSE;
-         if($attrs_group!=NULL) $has_group=TRUE;
-
-         if(isset($ldap_entry['dn'])) {
-            $smarty_entry['id']=saddr_urlEncrypt($saddr, $ldap_entry['dn']);
-            $smarty_entry['module']=$module;
-            $smarty_entry['dn']=$ldap_entry['dn'];
-            if($has_group) {
-               $smarty_entry['__group']=array();
-               foreach($attrs_group as $k=>$d) {
-                  $smarty_entry['__group'][$k]=array('nonempty'=>FALSE,
-                        'count'=>0);
-               }
-            }
-
-            if(isset($ldap_entry['seealso'])) {
-               $smarty_entry['seealso']=array();
-               for($i=0;$i<$ldap_entry['seealso']['count'];$i++) {
-                  $smarty_entry['seealso'][$i]=$ldap_entry['seealso'][$i];
-               }
-            }
-
-            foreach($attrs as $ldap_attr => $attr) {
-               if(isset($ldap_entry[$ldap_attr]) && $ldap_entry[$ldap_attr]['count']>0) {
-                  if (!is_array($attr)) {
-                     $attr = array($attr);
-                  }
-                  foreach($attr as $att) {
-                     if($has_group) {
-                        foreach($attrs_group as $k=>$ag) {
-                           if(in_array($att, $ag)) {
-                              $smarty_entry['__group'][$k]['nonempty']=TRUE;
-                              $smarty_entry['__group'][$k]['count']++;
-                              break;
-                           }
-                        }
-                     }
-                     if(isset($smarty_entry[$att])) {
-                        if(!is_array($smarty_entry[$att])) {
-                           if (is_string($smarty_entry[$att])) {
-                              $smarty_entry[$att] = array($smarty_entry[$att]);
-                           } else {
-                              $smarty_entry[$att] = array();
-                           }
-                        }
-                     } else {
-                        $smarty_entry[$att] = array();
-                     }
-                     for($i=0;$i<$ldap_entry[$ldap_attr]['count'];$i++) {
-                        if(!in_array($ldap_entry[$ldap_attr][$i],
-                                 $smarty_entry[$att])) {
-                           $smarty_entry[$att][] = $ldap_entry[$ldap_attr][$i];
-                        }
-                     }
-                  }
-               }
-            }
-         }
-      }      
    }
+   
+   $module='';
+   if(count($modules)==1) {
+      $module=$modules[0];
+   } else {
+      $last_same_class_count=-1;
+      foreach($modules as $m) {
+         $classes=saddr_getClass($saddr, $m);
+         $flat_classes=array($classes['structural']);
+         foreach($classes['auxiliary'] as $c) $flat_classes[]=$c;
+
+         $same_classes=0;
+         foreach($oc as $c) {
+            if(in_array($c, $flat_classes)) $same_classes++;
+         }
+         if($same_classes>$last_same_class_count) {
+            $last_same_class_count=$same_classes;
+            $module=$m;
+         }
+      }
+
+   }
+
+   if($module) {
+      $attrs=saddr_getAttrs($saddr, $module);
+      $attrs_group=saddr_getAttrsGroup($saddr, $module);
+      $has_group=FALSE;
+      if($attrs_group!=NULL) $has_group=TRUE;
+
+      $dn = $entry->dn();
+      if (!$dn) {
+         return [];
+      }
+
+      $smarty_entry['id'] = saddr_urlEncrypt($saddr, $dn);
+      $smarty_entry['module'] = $module;
+      $smarty_entry['dn'] = $dn;
+
+      if($has_group) {
+         $smarty_entry['__group']=array();
+         foreach($attrs_group as $k=>$d) {
+            $smarty_entry['__group'][$k]=array('nonempty'=>FALSE,
+                  'count'=>0);
+         }
+      }
+
+      $seealso = $entry->get('seealso');
+      if($seealso) {
+         $smarty_entry['seealso']=array();
+         for($i = 0; $i < $seealso['count']; $i++) {
+            $smarty_entry['seealso'][$i] = $seealso[$i];
+         }
+      }
+
+      foreach($attrs as $ldap_attr => $attr) {
+         $ldapValue = $entry->get($ldap_attr);
+         if (!$ldapValue) { continue; }
+         
+         if (!is_array($attr)) {
+            $attr = array($attr);
+         }
+         foreach($attr as $att) {
+            if($has_group) {
+               foreach($attrs_group as $k=>$ag) {
+                  if(in_array($att, $ag)) {
+                     $smarty_entry['__group'][$k]['nonempty']=TRUE;
+                     $smarty_entry['__group'][$k]['count']++;
+                     break;
+                  }
+               }
+            }
+            if(isset($smarty_entry[$att])) {
+               if(!is_array($smarty_entry[$att])) {
+                  if (is_string($smarty_entry[$att])) {
+                     $smarty_entry[$att] = array($smarty_entry[$att]);
+                  } else {
+                     $smarty_entry[$att] = array();
+                  }
+               }
+            } else {
+               $smarty_entry[$att] = array();
+            }
+            for($i = 0; $i < count($ldapValue); $i++) {
+               if(!in_array($ldapValue[$i], $smarty_entry[$att])) {
+                  $smarty_entry[$att][] = $ldapValue[$i];
+               }
+            }
+         }
+      }
+   }      
+   
    
    return $smarty_entry; 
 }

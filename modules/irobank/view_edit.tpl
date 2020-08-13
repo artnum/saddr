@@ -9,7 +9,9 @@
 <h1>{$saddr.search_results.name.0}</h1> 
 {/if}
 {/if}
+{if isset($saddr.search_results.dn)}
 <input type="hidden" name="dn" value="{$saddr.search_results.dn}" />
+{/if}
 <div id="saddrBusiness" class="saddr_section saddr_sectionLeft">
 <h2>Business</h2>
 {saddr_entry e="company" label="Bank" searchable=1 must=1}

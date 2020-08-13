@@ -251,7 +251,6 @@ function s2s_displaySmartyEntry($params, $smarty)
    } else {
       $entry=array();
    }
-
    if(!isset($params['e'])) { return; }
 
    $type=array('dijitTextBox', 'dijit.form.TextBox');
@@ -300,6 +299,11 @@ function s2s_displaySmartyEntry($params, $smarty)
 
    $multi=FALSE;
    if(isset($params['multi'])) $multi=TRUE;
+
+   $entryClass = " saddr_$params[e] ";
+   if (!empty($params['module'])) {
+      $entryClass .= "saddr_$params[module] ";
+   }
 
    $html='<div class="saddr_groupOfValue">';
    if(isset($entry['__edit']) || $edit_only) {
@@ -381,6 +385,13 @@ function s2s_displaySmartyEntry($params, $smarty)
             }
             break;
          case 'saddrJpegImage':
+            if (isset($entry[$params['e']])) {
+               $img_data = saddr_fixImageSize($saddr['handle'], $entry[$params['e']][0], 300, 80);
+               if ($img_data !== null) {
+                  $html.='<img src="data:image/jpeg;base64,'.base64_encode($img_data).'"  class="saddr_image '. $entryClass . '"/>';
+               }
+               $html.='<br/><label>Conserver l\'image <input type="checkbox" name="-'.$name.'" checked></label><br/>';
+            }
             $html.='<input type="file" multiple="false" name="'.$name.'" label="Image to upload" />';
             break;
       }
@@ -401,7 +412,7 @@ function s2s_displaySmartyEntry($params, $smarty)
          default:
             foreach($entry[$params['e']] as $v) {
                if($type[0]=='dijitTextArea') $v=nl2br($v);
-               $html.='<div class="saddr_value saddr_'.$type[0];
+               $html.='<div class="saddr_value saddr_'.$type[0] . $entryClass;
                if(!isset($with_label)) {
                   $html.=' saddr_valueNoLabel';
                }
@@ -426,7 +437,7 @@ function s2s_displaySmartyEntry($params, $smarty)
             }
             break;
          case 'saddrTagsArea':
-            $html.='<div class="saddr_value saddr_'.$type[0];
+            $html.='<div class="saddr_value saddr_'.$type[0] . $entryClass;
             if(!isset($with_label)) {
                $html.=' saddr_valueNoLabel';
             }
@@ -444,12 +455,11 @@ function s2s_displaySmartyEntry($params, $smarty)
             $html.='</div>';
             break;
          case 'saddrSelect':
-               $html.='<div class="saddr_value saddr_'.$type[0];
+               $html.='<div class="saddr_value saddr_'.$type[0] . $entryClass;
                if(!isset($with_label)) {
                   $html.=' saddr_valueNoLabel';
                }
                $html.='">';
-
                foreach($entry[$params['e']] as $v) {
                   if($want=='dn') {
                      $e=saddr_read($saddr['handle'], $v);
@@ -479,15 +489,15 @@ function s2s_displaySmartyEntry($params, $smarty)
                         }
                      }
                   }
-                  $html.='</div>';
                   if(!$multi) break;
                }
+               $html.='</div>';
                break;
          case 'saddrJpegImage':
                $img_data = saddr_fixImageSize($saddr['handle'],
                      $entry[$params['e']][0], 300, 80);
                if ($img_data !== null) {
-                  $html.='<img src="data:image/jpeg;base64,'.base64_encode($img_data).'" />';
+                  $html.='<img src="data:image/jpeg;base64,'.base64_encode($img_data).'"  class="saddr_image '. $entryClass . '"/>';
                }
             break;
       }

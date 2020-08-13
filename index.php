@@ -4,6 +4,8 @@
 
    See LICENSE file
  */
+require('vendor/autoload.php');
+
 define('SADDR_DEBUG_FILE', '/var/log/saddr/' . date('d-m-Y') . '.log');
 if(!file_exists(SADDR_DEBUG_FILE)) {
    file_put_contents(SADDR_DEBUG_FILE, '-- START FILE ' . date('c') . "\n", LOCK_EX);
@@ -23,20 +25,6 @@ if(!empty($tchetch_path) && is_readable($tchetch_path)) {
    include('lib/tchetch/tch.php');
 }
 if(!defined('TCH__')) die('Missing tchetch/tch.php');
-
-/* Extern project */
-$smarty_path=getenv('SADDR_SMARTY_PATH');
-if(!empty($smarty_path) && is_readable($smarty_path)) {
-   include($smarty_path);
-} else {
-   if(tch_isIncludable('Smarty3/Smarty.class.php'))
-      include('Smarty3/Smarty.class.php');
-   else if(tch_isIncludable('Smarty/Smarty.class.php'))
-      include('Smarty/Smarty.class.php');
-   else if(tch_isIncludable('Smarty.class.php'))
-      include('Smarty.class.php');
-   else die('Missing Smarty');
-}
 
 /* in saddr tree */
 include(dirname(__FILE__).'/lib/saddr.php');
@@ -73,27 +61,12 @@ if(isset($_SERVER['PHP_AUTH_PW']) && is_null(saddr_getPass($Saddr))) {
    saddr_setPass($Saddr, $_SERVER['PHP_AUTH_PW']);
 }
 
-/* Strip slashes if magic_quotes are on */
-if(get_magic_quotes_gpc()) {
-   tch_stripSlashes($_POST);
-   tch_stripSlashes($_GET);
-}
-
 /* INIT LDAP */
 $Ldap=saddr_prepareLdapConnection($Saddr);
 if($Ldap==NULL) {
    die('Cannot connect to any LDAP server');
-} else {
-   if(SADDR_PHP_LDAP_HAS_SERVER_CTRLS) {
-      if(tch_ldapSupportPagedResultControl($Ldap, saddr_getLdapRootDse($Saddr))) {
-         define('SADDR_USE_PAGED_RESULT', TRUE);
-      } else {
-         define('SADDR_USE_PAGED_RESULT', FALSE);
-      }
-   } else {
-         define('SADDR_USE_PAGED_RESULT', FALSE);
-   }
 }
+
 if(! saddr_loadMainConfiguration($Saddr)) {
    die('Cannot load configuration from LDAP server');
 }
@@ -133,17 +106,16 @@ if(is_string($tpl_dir) && is_dir($tpl_dir) && is_readable($tpl_dir)) {
 }
 unset($tpl_dir);
 
-$compile_dir=getenv('SADDR_SMARTY_COMPILE_DIR');
-if(is_string($compile_dir) && is_dir($compile_dir) &&
-      is_readable($compile_dir)) {
-   $Smarty->setCompileDir($compile_dir);
+$tmp=saddr_getTempDir($Saddr);
+if (@mkdir($tmp.'/compile/')) {
+   $Smarty->setCompileDir($tmp.'/compile/');
 } else {
-   $tmp=saddr_getTempDir($Saddr);
-   if(@mkdir($tmp.'/smarty-compile/')) {
-      $Smarty->setCompileDir($tmp.'/smarty-compile/');
-   } else {
-      $Smarty->setCompileDir('/tmp/');
-   }
+   $Smarty->setCompileDir('/tmp/');
+}
+if (@mkdir($tmp.'/cache/')) {
+   $Smarty->setCacheDir($tmp.'/cache/');
+} else {
+   $Smarty->setCacheDir($tmp);
 }
 
 /* Register saddr plugin */
@@ -297,7 +269,7 @@ if(isset($_GET['op'])) {
                      $smarty_entry[$k][]=$_v;
                   }
                }
-               if(empty($smarty_entry[$k])) unset($smarty_entry[$k]);
+               if(empty($smarty_entry[$k])) { unset($smarty_entry[$k]); }
             }
          }
          foreach($_FILES as $k=>$v) {
@@ -478,5 +450,6 @@ $saddr_results['__runtime']=round(((($_runtime_stop['sec'] * 1000) + ($_runtime_
 saddr_getSmarty($Saddr)->assign('saddr', $saddr_results);
 
 /* DISPLAY */
+
 saddr_getSmarty($Saddr)->display('index.tpl');
 ?>

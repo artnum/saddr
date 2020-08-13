@@ -1,5 +1,5 @@
 <?PHP
-/* (c) 2012 Etienne Bagnoud
+/* (c) 2012-2020 Etienne Bagnoud <etienne@artnum.ch>
    This file is part of saddr project. saddr is under the MIT license.
 
    See LICENSE file
@@ -14,6 +14,7 @@ function saddr_add(&$saddr, $smarty_entry)
       $ldap_entry=saddr_makeLdapEntry($saddr, $smarty_entry);
 
       foreach($ldap_entry as $attr=>$value) {
+         if (substr($attr, 0, 1) === '-') { unset($ldap_entry[$attr]); continue; }
          $v=saddr_processAttributes($saddr, $smarty_entry['module'],
                array($attr, $value));
          if($v!==FALSE) {
@@ -71,27 +72,32 @@ function saddr_add(&$saddr, $smarty_entry)
                   }
                }
 
-               if($dn!='') {
-                  $ret=array($dn, @ldap_add(saddr_getLdap($saddr), $dn,
-                           $ldap_entry));
-                  if(! $ret[0]) {
-                     $entry = '-- Error addition failed' . "\n";
-                     $entry .= 'LDAP ERROR : ' . ldap_error(saddr_getLdap($saddr)) . "\n";
-                     $entry .= "\n";
-                     $entry .= var_export($ldap_entry) . "\n";
-                     $entry .= "\n";
-                     $entry .= $dn . "\n";
-                     $entry .= '--' . "\n\n";
-                     file_put_contents(SADDR_DEBUG_FILE, $entry,  FILE_APPEND | LOCK_EX);
+               if(!empty($dn)) {
+                  $entry = new artnum\LDAPHelperEntry(saddr_getLdap($saddr));
+                  $entry->dn($dn);
+                  
+                  foreach ($ldap_entry as $attr => $value) {
+                     $entry->add($attr, $value);
                   }
-                  return $ret;
+                  $ret = $entry->commit();
+                  if(!$ret) {
+                     $msg = '-- Error addition failed' . "\n";
+                     $msg .= 'LDAP ERROR : ' . $entry->lastError() . "\n";
+                     $msg .= "\n";
+                     $msg .= var_export($ldap_entry, true) . "\n";
+                     $msg .= "\n";
+                     $msg.= $dn . "\n";
+                     $msg.= '--' . "\n\n";
+                     file_put_contents(SADDR_DEBUG_FILE, $msg,  FILE_APPEND | LOCK_EX);
+                  }
+                  return [$dn, $ret];
                }
             }
          }
       }
    }
 
-   return array('', FALSE);
+   return ['', false];
 }
 
 ?>

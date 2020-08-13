@@ -1,5 +1,5 @@
 <?PHP
-/* (c) 2012 Etienne Bagnoud
+/* (c) 2012-2020 Etienne Bagnoud <etienne@artnum.ch>
    This file is part of saddr project. saddr is under the MIT license.
 
    See LICENSE file
@@ -10,107 +10,24 @@
  */
 function saddr_prepareLdapConnection(&$saddr)
 {
-   $ldap_handle=NULL;
+   $ldap_handle = new artnum\LDAPHelper();
 
-   $ldap_host=saddr_getLdapHost($saddr);
+   $ldap_host = saddr_getLdapHost($saddr);
+   $user = saddr_getUser($saddr);
+   $pass = saddr_getPass($saddr);
+
+   $opts = [];
+   if (!empty($user) && !empty($pass)) {
+      $opts = [ 'dn' => $user, 'password' => $pass];
+   }
    if(is_string($ldap_host)) {
-      $ldap_handle=ldap_connect($ldap_host);
+      $ldap_handle->addServer($ldap_host, 'simple', $opts);
    } else {
       /* Try connect without option in case ldap.conf is correctly configured
        */
-      $ldap_handle=ldap_connect();
+      $ldap_handle->addServer('', 'simple', $opts);
    }
-   
-   if($ldap_handle) {
-      $root_dse=tch_getRootDSE($ldap_handle);
-      if($root_dse) {
-         saddr_setLdapRootDse($saddr, $root_dse);
-
-         /* Find and set LDAP Version */
-         if(($ldap_version=
-                  tch_getLdapVersion($ldap_handle, $root_dse))!==FALSE) {
-            if(!ldap_set_option($ldap_handle, 
-                     LDAP_OPT_PROTOCOL_VERSION, $ldap_version)) {
-               saddr_setError($saddr, SADDR_ERR_LDAP_VERSION, __FILE__,
-                     __LINE__);
-               ldap_close($ldap_handle);
-               $ldap_handle=NULL;
-            }
-         } else {
-            saddr_setError($saddr, SADDR_ERR_LDAP_VERSION, __FILE__, __LINE__);
-            ldap_close($ldap_handle);
-            $ldap_handle=NULL;
-         }
-
-         if(tch_canTryStartTls($ldap_handle, $root_dse)) {
-            ldap_start_tls($ldap_handle); 
-         }
-
-         /* Find directory base, take the first found */
-         if($ldap_handle!=NULL) {
-            if(($bases=tch_getLdapBases($ldap_handle, $root_dse))!==FALSE) {
-               foreach($bases as $b) {
-                  saddr_setLdapBase($saddr, $b);
-               }
-            } else {
-               saddr_setError($saddr, SADDR_ERR_LDAP_BASE, __FILE__,
-                     __LINE__);
-               ldap_close($ldap_handle);
-               $ldap_handle=NULL;
-            }
-         }
-
-         /* Get objectclasses available in directory */
-         if($ldap_handle!=NULL) {
-            if(($oc=tch_getLdapObjectClasses($ldap_handle, 
-                        $root_dse))!=FALSE) {
-               saddr_setLdapObjectClasses($saddr, $oc); 
-            } else {
-               saddr_setError($saddr, SADDR_ERR_LDAP_OBJECTCLASS, __FILE__,
-                     __LINE__);
-               ldap_close($ldap_handle);
-               $ldap_handle=NULL;
-            }
-         }
-
-         /* Bind either with provided user/pass or anonymously */
-         if($ldap_handle!=NULL) {
-            $user=saddr_getUser($saddr);
-            $pass=saddr_getPass($saddr);
-            if(is_string($user) && is_string($pass)) {
-               if(ldap_bind($ldap_handle, $user, $pass)) {
-                  saddr_setLdap($saddr, $ldap_handle);
-               } else {
-                  saddr_setError($saddr, SADDR_ERR_LDAP_BIND, __FILE__,
-                        __LINE__);
-                  saddr_setUserMessage($saddr, 'Authentication failed');
-                  ldap_close($ldap_handle);
-                  $ldap_handle=NULL;
-               }
-            } else {
-               /* Anonymous bind */
-               if(ldap_bind($ldap_handle)) {
-                  saddr_setLdap($saddr, $ldap_handle);
-                  saddr_setUserMessage($saddr, 'Anonmyous connection',
-                        SADDR_MSG_WARNING);
-               } else {
-                  saddr_setError($saddr, SADDR_ERR_LDAP_BIND, __FILE__,
-                        __LINE__);
-                  saddr_setUserMessage($saddr, 'Authentication failed');
-                  ldap_close($ldap_handle);
-                  $ldap_handle=NULL;
-               }
-            }
-         }
-      } else {
-         saddr_setError($saddr, SADDR_ERR_ROOTDSE, __FILE__, __LINE__);
-         ldap_close($ldap_handle);
-         $ldap_handle=NULL;
-      }
-   } else {
-      saddr_setError($saddr, SADDR_ERR_LDAP_CONNECTION, __FILE__, __LINE__);
-      $ldap_handle=NULL;
-   }
+   saddr_setLdap($saddr, $ldap_handle);
 
    return $ldap_handle;
 }

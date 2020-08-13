@@ -1,5 +1,5 @@
 <?PHP
-/* (c) 2012 Etienne Bagnoud
+/* (c) 2012-2020 Etienne Bagnoud <etienne@artnum.ch>
    This file is part of saddr project. saddr is under the MIT license.
 
    See LICENSE file
@@ -32,11 +32,11 @@ function saddr_modify(&$saddr, $smarty_entry)
             $multi=explode('+', $dn_parts[0]);
             foreach($multi as $m) {
                $x=explode('=', $m);
-               $rdn_components[$x[0]]=$x[1];
+               $rdn_components[strtolower($x[0])]=$x[1];
             }
          } else {
             $x=explode('=', $dn_parts[0]);
-            $rdn_components[$x[0]]=$x[1];
+            $rdn_components[strtolower($x[0])]=$x[1];
          }
 
          $need_rename=FALSE;
@@ -67,60 +67,69 @@ function saddr_modify(&$saddr, $smarty_entry)
             }
          }
 
+         $ldap = saddr_getLdap($saddr);
+         $results = $ldap->search($dn, '(objectclass=*)', ['*'], 'base');
+         $old = null;
+         foreach ($results as $rset) {
+            if ($rset->count() === 1) {
+               $old = $rset->firstEntry();
+            }
+         }
+         if (!$old) { return false; }
          if(!$need_rename) {
-            $old=saddr_read($saddr, $dn);
-            $ldap_old=saddr_makeLdapEntry($saddr, $old);
-            
-            /* Add new attributes */
-            $op_success=TRUE;
-            foreach($ldap_entry as $attr=>$val) {
-               if(!isset($ldap_old[$attr])) {
-                  $op_success=@ldap_mod_add(saddr_getLdap($saddr), $dn,
-                        array($attr=>$val));
+            $attrs = [];
+            foreach ($ldap_entry as $attr => $val) {
+               /* attribute with name starting with '-' are ignored */
+               if (substr($attr, 0, 1) === '-') {
+                  $attrs[] = substr($attr, 1);
+                  continue;
                }
-            }
-
-            foreach($ldap_old as $attr=>$val) {
-               if(!isset($ldap_entry[$attr])) {
-                  $_op_success=@ldap_mod_del(saddr_getLdap($saddr), $dn,
-                        array($attr=>array()));
-                  if(!$_op_success) {
-                     $op_success=FALSE;
+               if (in_array($attr, $rdn_components)) { continue; }
+               if (substr($attr, 0, 1) === '-') {
+                  $_attr = substr($attr, 1);
+                  if ($old->get($_attr)) {
+                     $old->delete($_attr);
                   }
+                  continue;
+               }
+               $attrs[] = $attr;
+               $old_val = $old->get($attr);
+               if ($old_val === null) {
+                  $old->add($attr, $val);
                } else {
-                  if(count($val)!=count($ldap_entry[$attr])) {
-                     $_op_success=@ldap_mod_replace(saddr_getLdap($saddr), $dn,
-                           array($attr=>$ldap_entry[$attr]));
-                     if(!$_op_success) {
-                        $op_success=FALSE;
-                     }
+                  if (count($val) !== count($old_val)) {
+                     $old->replace($attr, $val);
                   } else {
-                     $modify=FALSE;
-                     foreach($val as $k=>$v) {
-                        if($ldap_entry[$attr][$k]!=$v) {
-                           $modify=TRUE;
-                           break;
-                        }
-                     }
-                     if($modify) {
-                        $_op_success=@ldap_mod_replace(saddr_getLdap($saddr), 
-                              $dn, array($attr=>$ldap_entry[$attr]));
-                        if(!$_op_success) {
-                           $op_success=FALSE;
+                     $replace = false;
+                     foreach ($val as $v) {
+                        foreach ($old_val as $v2) {
+                           if ($v !== $v2) {
+                              $old->replace($attr, $val);
+                              $replace = true;
+                              break;
+                           }
+                           if ($replace) { break; }
                         }
                      }
                   }
                }
             }
-            
-            $ret=array($dn, $op_success );
+            foreach($old->eachAttribute() as $attr => $value) {
+               if (in_array($attr, array_keys($rdn_components))) { continue; }
+               if ($attr === 'objectclass') { continue; }
+               if (!in_array($attr, $attrs)) {
+                  $old->delete($attr);
+               }
+            }
+     
+            $ret=array($dn, $old->commit());
             if(!$ret[1]) {
                $ret[0]=$smarty_entry['dn'];
             }
          } else {
             $ret=saddr_add($saddr, $smarty_entry);
             if($ret[1]) {
-               @ldap_delete(saddr_getLdap($saddr), $dn);
+               $ldap->delete($old->dn());
             } else {
                $ret[0]=$smarty_entry['dn'];
             }
