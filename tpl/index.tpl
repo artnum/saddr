@@ -8,6 +8,7 @@
   <script src="conf/app.js"></script>
   <script src="js/gevent.js"></script>
   <script src="js/location.js"></script>
+  <script src="js/multi.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/dojo/1.14.1/dojo/dojo.js" data-dojo-config="parseOnLoad: true"></script>
 <script>
  dojo.require('dojo._base.declare')
@@ -47,8 +48,7 @@
 			name="module" value="{$saddr.search_results.module}" />{/if}
 		{include file=$saddr.display}
 		<div id="saddr_buttonsContainer">
-		<input type="submit" value="Ok" name="saddr_goAddEdit"
-	           data-dojo-type="dijit.form.Button" data-dojo-props="label: 'Ok'" />
+		<input type="submit" value="Ok" name="saddr_goAddEdit" />
 		</div>
 		</form>
       </div>

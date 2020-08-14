@@ -38,7 +38,8 @@ function ext_iroorganization_getAttrs()
       'custom3'=>'tags',
       'custom4'=>'work_mobile',
       'description'=>'description',
-      'businesscategory' => 'business'
+      'businesscategory' => 'business',
+      'primaryactivity' => 'principalbusiness'
       );
 }
 

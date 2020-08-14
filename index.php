@@ -256,6 +256,45 @@ if(isset($_GET['op'])) {
             }
          }
          break;
+      case 'doSearchByRecursiveAttribute':
+         if (!empty($_GET['attribute']) && !empty($_GET['search']) &&
+            !empty($_GET['leaf']) && !empty($_GET['leafvalue'])
+         ) {
+            $attribute = saddr_urlDecrypt($Saddr, $_GET['attribute']);
+            $search = saddr_urlDecrypt($Saddr, $_GET['search']);
+            $leafattr = saddr_urlDecrypt($Saddr, $_GET['leaf']);
+            $leafvalue = saddr_urlDecrypt($Saddr, $_GET['leafvalue']);
+
+            $root = saddr_read($Saddr, $search);
+            $leaves[] = $root;
+            $searchDn[] = $root['dn'];
+            while (($dn = array_pop($searchDn))) {
+               $results = saddr_search($Saddr, $dn, [$attribute]);
+               foreach ($results as $r) {
+                  array_push($searchDn, $r['dn']);
+                  $leaves[] = saddr_read($Saddr, $r['dn']);
+               }
+            }
+
+            $entries = [];
+            foreach ($leaves as $leaf) {
+               $entries = array_merge($entries, saddr_search($Saddr, $leaf[$leafvalue][0], [$leafattr]));
+            }
+            $dns = [];
+            foreach ($entries as $k => $v) {
+               if (!in_array($v['dn'], $dns)) {
+                  $dns[] = $v['dn'];
+               } else {
+                  unset($entries[$k]);
+               }
+            }
+            $saddr_results['op']='doSearchByAttribute';
+            $saddr_results['display']='results.tpl';
+            if(!empty($entries)) {
+               $saddr_results['search_results']=$entries;
+            }
+         }
+         break;
       case 'doAddOrEdit':
          $smarty_entry=array();
 

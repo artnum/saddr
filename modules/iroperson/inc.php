@@ -55,7 +55,8 @@ function ext_iroperson_getAttrs()
       'irobankestablishment'=>'bank',
       'birthday'=>'birthday',
       'jpegphoto'=>'picture',
-      'businesscategory' => 'business'
+      'businesscategory' => 'business',
+      'primaryactivity' => 'principalbusiness'
       );
 }
 

@@ -13,4 +13,7 @@
 <div id="saddrNames" class="saddr_section saddr_sectionLeft">
 {saddr_entry e="name" label="Nom"}
 {saddr_entry e="description" label="Description"}
+{saddr_entry e="parent" label="Activité mère"
+  type="sselect" module="category"
+  format="@name@" want="dn" multi=1 recurseOn="parent" labelonview=1}
 </div>

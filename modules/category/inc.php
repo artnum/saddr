@@ -21,6 +21,7 @@ function ext_category_getAttrs()
    return array(
        'uniqueidentifier' => 'uniqueidentifier',
       'description'=>array('description', '_saddr_res1'),
+      'type' => 'parent',
       'cn'=>array('name', '_saddr_res0'),
       );
 }

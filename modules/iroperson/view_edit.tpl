@@ -25,12 +25,16 @@
 </div>
 {/saddr_ifgroup}
 
-{saddr_ifgroup group="work"}
 <div id="saddrBusiness" class="saddr_section saddr_sectionLeft">
 <h2>Professionnel</h2>
-{saddr_entry e="business" label="Domaine d'activité"
+{saddr_entry e="principalbusiness" label="Activité principale"
   type="sselect" module="category"
-  format="@name@" want="uniqueidentifier" multi=1}
+  format="@name@" want="uniqueidentifier" recurseOn="parent" labelonview=1 leafOnly=1}
+
+{saddr_entry e="business" label="Autres activités"
+  type="sselect" module="category"
+  format="@name@" want="uniqueidentifier" multi=1 recurseOn="parent" labelonview=1 leafOnly=1}
+
 {saddr_entry e="company" label="Société" searchable=1 multi=1}
 {saddr_entry e="work_address" label="Adresse" type="textarea"}
 {saddr_entry e="work_npa" label="Code postal"}
@@ -42,7 +46,6 @@
 {saddr_entry e="work_telephone" label="Téléphone" labelonview=1 multi=1 type="phone"}
 {saddr_entry e="work_fax" label="Fax" labelonview=1 multi=1}
 </div>
-{/saddr_ifgroup}
 
 {saddr_ifgroup group="private"}
 <div id="saddrPersonnal" class="saddr_section saddr_sectionRight">
@@ -54,7 +57,7 @@
 {saddr_entry e="home_country" label="Pays"
   type="sselect" module="country"
   format="@name@" want="code"}
-{saddr_entry e="home_telephone" label="Téléèjpme" labelonview=1 multi=1 type="phone"}
+{saddr_entry e="home_telephone" label="Téléphone" labelonview=1 multi=1 type="phone"}
 {saddr_entry e="home_mobile" label="Mobile" labelonview=1 multi=1 type="phone"}
 {saddr_entry e="birthday" label="Anniversaire" labelonview=1 type="date"}
 </div>

@@ -107,6 +107,11 @@ attributetype ( 1.3.6.1.4.1.30890.1.2.1.13
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 
 	SINGLE-VALUE )
 
+attributetype ( 1.3.6.1.4.1.30890.1.2.1.14
+	NAME 'primaryActivity'
+	DESC 'Primary business activity'
+	SUP businessCategory )
+
 objectclass ( 1.3.6.1.4.1.30890.1.2.2.0
 	NAME 'iroAdditionalUserInfo'
 	DESC 'Additional useful user information, use to extend inetOrgPerson'
@@ -114,7 +119,7 @@ objectclass ( 1.3.6.1.4.1.30890.1.2.2.0
 	MAY ( iroHomeState $ iroHomeLocality $ iroHomePostalCode $
 	      iroBankAccount $ iroBankEstablishment $ iroUseHtmlMail $
 	      iroHomeCountryName $ countryName $ AVSNumber $ 
-	      AVSNumberOld ) )
+	      AVSNumberOld $ primaryActivity ) )
 
 objectclass ( 1.3.6.1.4.1.30890.1.2.2.1
 	NAME 'iroContractPerson'
@@ -134,4 +139,4 @@ objectclass ( 1.3.6.1.4.1.30890.1.2.2.3
         NAME 'iroOrganizationExtended'
         DESC 'Extended information for organization'
 	SUP top AUXILIARY
-        MAY ( labeledURI $ countryName $ mail $ uid ) )
+        MAY ( labeledURI $ countryName $ mail $ uid $ primaryActivity ) )

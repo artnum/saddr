@@ -174,15 +174,3 @@ div#edit .saddr_value {
 .saddr_res3 {
    width: 28%;
 }
-
-div.saddr_saddrSelect.saddr_value a:first-child {
-   margin: 0 1ch 0 0;
-}
-
-div.saddr_saddrSelect.saddr_value a:last-child {
-   margin: 0 0 0 1ch;
-}
-
-div.saddr_saddrSelect.saddr_value a {
-   margin: 0 1ch 0 1ch;
-}

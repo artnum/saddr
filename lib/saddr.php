@@ -372,7 +372,11 @@ function saddr_getModuleBase(&$saddr, $module)
                !empty($saddr['modules']['bases'][$module])) {
             /* A bit silly, but we might have more than one base for a module */
             return array($saddr['modules']['bases'][$module]);
-         }
+         } else if (
+            is_array($saddr['modules']['bases'][$module]) &&
+            !empty($saddr['modules']['bases'][$module])) {
+               return $saddr['modules']['bases'][$module];
+            }
       }
    }
    

@@ -169,7 +169,7 @@ function s2s_generateUrl($params, $smarty)
    $base_filename=saddr_getBaseFileName($saddr['handle']);
 
    if(isset($params['encrypt'])) {
-      foreach(array('id', 'search', 'attribute', 'module') as $p) {
+      foreach(['id', 'search', 'attribute', 'module', 'leaf', 'leafvalue'] as $p) {
          if(isset($params[$p])) {
             $params[$p]=s2s_encUrl(array('value'=>$params[$p]), $smarty);
          }
@@ -218,9 +218,16 @@ function s2s_generateUrl($params, $smarty)
             }
             break;
          case 'doSearchByAttribute':
+         case 'doSearchByRecursiveAttribute':
             if(isset($params['search']) && isset($params['attribute'])) {
-               $url.='?op=doSearchByAttribute&attribute='.$params['attribute'].
+               $url.='?op=' . $params['op'] . '&attribute='.$params['attribute'].
                   '&search='.$params['search'];
+               if (!empty($params['leaf'])) {
+                  $url .= '&leaf=' . $params['leaf'];
+               }
+               if (!empty($params['leafvalue'])) {
+                  $url .= '&leafvalue=' . $params['leafvalue'];
+               }
             }
             break;
          case 'doDelete':
@@ -294,11 +301,16 @@ function s2s_displaySmartyEntry($params, $smarty)
       $want=$params['want'];
    }
 
-   $display_label_on_view=FALSE;
-   if(isset($params['labelonview'])) $display_label_on_view=TRUE;
+   $display_label_on_view = false;
+   if(isset($params['labelonview'])) { $display_label_on_view = true; }
 
-   $multi=FALSE;
-   if(isset($params['multi'])) $multi=TRUE;
+   $multi = false;
+   $htmlMulti='';
+   if(isset($params['multi'])) {
+      $multi = true;
+      $htmlMulti = ' data-multi="1" ';
+   }
+   
 
    $entryClass = " saddr_$params[e] ";
    if (!empty($params['module'])) {
@@ -323,31 +335,28 @@ function s2s_displaySmartyEntry($params, $smarty)
          case 'dijitDateTextBox':
          case 'dijitTextBox':
             foreach($v_entry as $v) {
-               $html.='<input type="text" name="'.$name.'" '.
+               $html.='<input type="text" name="'.$name.'" '. $htmlMulti .
                   'value="'.$v.'" '.
                   $required.' '.
-                  'class="saddr_value saddr_textbox" '.
-                  'data-dojo-type="'.$type[1].'" />';
+                  'class="saddr_value saddr_textbox" />';
                if(!$multi) break;
                $required='';
             }
             break;
          case 'dijitTextArea':
             foreach($v_entry as $v) {
-               $html.='<textarea name="'.$name.'" '.
+               $html.='<textarea name="'.$name.'" '. $htmlMulti .
                   'class="saddr_value saddr_textarea" '.
-                  $required.' '.
-                  'data-dojo-type="'.$type[1].'">'.
+                  $required.'>'.
                   $v.'</textarea>';
                if(!$multi) break;
                $required=''; /* Required value need, at least, 1 value */
             }
             break;
          case 'saddrTagsArea':
-            $html.='<textarea name="'.$name.'" '.
+            $html.='<textarea name="'.$name.'" '. $htmlMulti . 
                'class="saddr_value saddr_textarea" '.
-                $required.' '.
-               'data-dojo-type="'.$type[1].'">';
+                $required.'>';
             foreach($v_entry as $v) {
                $html.=$v;
                if($v!='') $html.=', ';
@@ -358,28 +367,42 @@ function s2s_displaySmartyEntry($params, $smarty)
             if(!isset($module)) return;
             $res=saddr_list($saddr['handle'], $module);
             foreach($v_entry as $v) {
-                  if(isset($params['format']) &&
-                        is_string($params['format'])) {
-                     $html.='<select name="'.$name.'"'.
-                        ' class="saddr_value saddr_select"'.
-                        ' '.$required.
-                        ' data-dojo-type="'.$type[1].'">';
-                     $html.='<option value=""></option>';
-                     foreach($res as $select) {
-                        if($want=='dn') {
-                           $svalue=$select[$want];
-                        } else {
-                           $svalue=$select[$want][0];
-                        }
-                        $html.='<option value="'.$svalue.'"';
-                        if($svalue==$v) $html.=' selected="1"';
-                        $html.=' >';
-                        $html.=saddr_sprint($saddr['handle'], 
-                              $params['format'], $select);
-                        $html.='</option>';
+               if(isset($params['format']) &&
+                     is_string($params['format'])) {
+                  $html.='<select name="'.$name.'"'. $htmlMulti .
+                     ' class="saddr_value saddr_select"'.
+                     ' '.$required.'>';
+                  $html.='<option value=""></option>';
+                  foreach($res as $select) {
+                     if($want=='dn') {
+                        $svalue=$select[$want];
+                     } else {
+                        $svalue=$select[$want][0];
                      }
-                     $html.='</select>';
+                     if (!empty($params['leafOnly']) && !empty($params['recurseOn'])) {
+                        if (!empty(saddr_search($saddr['handle'], $svalue, [$params['recurseOn']]))) {
+                           continue;
+                        }
+                     }
+                     $html.='<option value="'.$svalue.'"';
+                     if($svalue==$v) { $html.=' selected="1"'; }
+                     $html.=' >';   
+                     $html.= saddr_sprint($saddr['handle'], $params['format'], $select);
+                     $path = [];
+                     if (!empty($params['recurseOn'])) {
+                        $parent = $select;
+                        while (!empty($parent[$params['recurseOn']])) {
+                           if ($parent[$params['recurseOn']][0] === $parent['dn']) { break; }
+                           $parent = saddr_read($saddr['handle'], $parent[$params['recurseOn']][0]);
+                           if (empty($parent)) { break; }
+                           array_unshift($path, saddr_sprint($saddr['handle'], $params['format'], $parent));
+                        }
+                     }
+                     if (!empty($path)) { $html .= ' (' . implode(' > ', $path) . ')'; }
+                     $html.='</option>';
                   }
+                  $html.='</select>';
+               }
                if(!$multi) break;
                $required='';
             }
@@ -392,7 +415,7 @@ function s2s_displaySmartyEntry($params, $smarty)
                }
                $html.='<br/><label>Conserver l\'image <input type="checkbox" name="-'.$name.'" checked></label><br/>';
             }
-            $html.='<input type="file" multiple="false" name="'.$name.'" label="Image to upload" />';
+            $html.='<input type="file" multiple="false" name="'.$name.'" label="Image to upload" ' . $htmlMulti . ' />';
             break;
       }
    } else {
@@ -455,12 +478,12 @@ function s2s_displaySmartyEntry($params, $smarty)
             $html.='</div>';
             break;
          case 'saddrSelect':
-               $html.='<div class="saddr_value saddr_'.$type[0] . $entryClass;
-               if(!isset($with_label)) {
-                  $html.=' saddr_valueNoLabel';
-               }
-               $html.='">';
                foreach($entry[$params['e']] as $v) {
+                  $html.='<div class="saddr_value saddr_'.$type[0] . $entryClass;
+                  if(!isset($with_label)) {
+                     $html.=' saddr_valueNoLabel';
+                  }
+                  $html.='">';
                   if($want=='dn') {
                      $e=saddr_read($saddr['handle'], $v);
                      $html.='<a href="';
@@ -474,24 +497,45 @@ function s2s_displaySmartyEntry($params, $smarty)
                      $res=saddr_list($saddr['handle'], $module);
                      foreach($res as $r) {
                         if($r[$want][0]==$v) {
+                           $path = '';
+                           if (!empty($params['recurseOn'])) {
+                              $parent = $r;
+                              while (!empty($parent[$params['recurseOn']])) {
+                                 if ($parent[$params['recurseOn']][0] === $parent['dn']) { break; }
+                                 $pid = $parent[$params['recurseOn']][0];
+                                 $parent = saddr_read($saddr['handle'], $parent[$params['recurseOn']][0]);
+                                 if (empty($parent)) { break; }
+                                 $p = '';
+                                 $p .= '<a href="' . s2s_generateUrl([
+                                    'op' => 'doSearchByRecursiveAttribute',
+                                    'search' => $pid,
+                                    'attribute' => $params['recurseOn'],
+                                    'leafvalue' => $want,
+                                    'leaf' => $params['e'],
+                                    'encrypt' => 1], $smarty) . '" title="Recherche \'' . saddr_sprint($saddr['handle'], $params['format'], $parent);
+                                 $p .= '\'">' . saddr_sprint($saddr['handle'], $params['format'], $parent) . '</a> &gt; ';
+                                 $path = $p . $path;
+                              }
+                           }
+                           $html .= $path;
                            $html.='<a href="';
                            $html.=s2s_generateUrl(
                                  array('op'=>'doSearchByAttribute',
                                  'attribute'=>$want,
                                  'search'=>$v,
                                  'encrypt'=>1), $smarty);
-                           $html.='" title="Search for ';
+                           $html.='" title="Recherche \'';
                            $html.=saddr_sprint($saddr['handle'], $params['format'], $r);
-                           $html.='">';
+                           $html.='\'">';
                            $html.=saddr_sprint($saddr['handle'], $params['format'], $r);
                            $html.='</a>';
                            break;
                         }
                      }
                   }
+                  $html.='</div>';
                   if(!$multi) break;
                }
-               $html.='</div>';
                break;
          case 'saddrJpegImage':
                $img_data = saddr_fixImageSize($saddr['handle'],
@@ -502,9 +546,7 @@ function s2s_displaySmartyEntry($params, $smarty)
             break;
       }
    }
-
    $html.='</div>';
-
    return $html;
 }
 

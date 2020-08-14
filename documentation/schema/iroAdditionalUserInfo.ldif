@@ -33,6 +33,8 @@ olcAttributeTypes: ( 1.3.6.1.4.1.30890.1.2.1.10 NAME 'iroBankSwift' DESC 'S
 olcAttributeTypes: ( 1.3.6.1.4.1.30890.1.2.1.11 NAME 'iroBankClearing' DESC
   'Bank clearing number' EQUALITY integerMatch SYNTAX 1.3.6.1.4.1.1466.115.121
  .1.27 SINGLE-VALUE )
+ olcAttributeTypes: ( 1.3.6.1.4.1.30890.1.2.1.14 NAME 'primaryActivity' DESC
+  'Primary business activity' SUP businessCategory )
 olcAttributeTypes: ( 1.3.6.1.4.1.30890.1.2.2.5 NAME 'iroContractStartDate'
   DESC 'Person contract start' OBSOLETE EQUALITY caseIgnoreMatch SUBSTR caseIg
  noreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
@@ -49,7 +51,7 @@ olcObjectClasses: ( 1.3.6.1.4.1.30890.1.2.2.0 NAME 'iroAdditionalUserInfo'
  DESC 'Additional useful user information, use to extend inetOrgPerson' SUP to
  p AUXILIARY MAY ( iroHomeState $ iroHomeLocality $ iroHomePostalCode $ iroBan
  kAccount $ iroBankEstablishment $ iroUseHtmlMail $ iroHomeCountryName $ count
- ryName $ AVSNumber $ AVSNumberOld ) )
+ ryName $ AVSNumber $ AVSNumberOld $ primaryActivity) )
 olcObjectClasses: ( 1.3.6.1.4.1.30890.1.2.2.1 NAME 'iroContractPerson' DESC
   'Additional contractual information' OBSOLETE SUP top AUXILIARY MUST iroCont
  ractStartDate MAY iroContractEndDate )
@@ -58,4 +60,4 @@ olcObjectClasses: ( 1.3.6.1.4.1.30890.1.2.2.2 NAME 'iroBank' DESC 'Extended
  aring $ iroBankPostalAccount ) )
 olcObjectClasses: ( 1.3.6.1.4.1.30890.1.2.2.3 NAME 'iroOrganizationExtended
  ' DESC 'Extended information for organization' SUP top AUXILIARY MAY ( labele
- dURI $ countryName $ mail $ uid ) )
+ dURI $ countryName $ mail $ uid $ primaryActivity ) )

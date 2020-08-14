@@ -16,9 +16,15 @@
 <h2>Professionnel</h2>
 {saddr_entry e="company" label="Société" searchable=1 must=1}
 {saddr_entry e="branch" label="Succursale"}
-{saddr_entry e="business" label="Domaine d'activité"
+
+{saddr_entry e="principalbusiness" label="Activité principale"
   type="sselect" module="category"
-  format="@name@" want="uniqueidentifier" multi=1}
+  format="@name@" want="uniqueidentifier" recurseOn="parent" labelonview=1 leafOnly=1}
+
+{saddr_entry e="business" label="Autres activités"
+  type="sselect" module="category"
+  format="@name@" want="uniqueidentifier" multi=1 recurseOn="parent" labelonview=1 leafOnly=1}
+
 {saddr_entry e="work_address" label="Adresse" type="textarea"}
 {saddr_entry e="work_npa" label="Code postal"}
 {saddr_entry e="work_city" label="Localité" searchable=1}
