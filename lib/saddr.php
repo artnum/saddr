@@ -387,7 +387,13 @@ function saddr_getAllLdapBase(&$saddr)
 {
    $bases=saddr_getLdapBase($saddr);
    foreach($saddr['modules']['bases'] as $b) {
-      $bases[]=$b;
+      if (is_array($b)) {
+         foreach($b as $_b) {
+            $bases[] = $_b;
+         }
+      } else {
+         $bases[]=$b;
+      }
    }
    return $bases;
 }

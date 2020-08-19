@@ -32,4 +32,39 @@ function saddr_prepareLdapConnection(&$saddr)
    return $ldap_handle;
 }
 
+function saddr_reduceBases ($bases) {
+   $out = [];
+   foreach ($bases as $base) {
+      if (empty($out)) {
+         $out[] = $base;
+      } else {
+         foreach ($out as $k => $v) {
+            if ($v === $base) { continue; }
+            $lv = strlen($v);
+            $lb = strlen($base);
+            if ($lv > $lb) {
+               if (strpos($v, $base) === $lv - $lb) {
+                  if (in_array($base, $out)) {
+                     unset($out[$k]);
+                  } else {
+                     $out[$k] = $base;
+                  }
+               } else {
+                  if (!in_array($base, $out)) {
+                     $out[] = $base;
+                  }
+               }
+            } else {
+               if (strpos($v, $base) !== $lv - $lb) {
+                  if (!in_array($base, $out)) {
+                     $out[] = $base;
+                  }
+               }
+            }
+         }
+      }
+   }
+   return $out;
+}
+
 ?>

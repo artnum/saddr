@@ -15,18 +15,6 @@ $_runtime_start=gettimeofday();
 define('SADDR__', 1);
 
 include(dirname(__FILE__).'/saddrErrors.php');
-
-
-/* My own library, must be includable */
-$tchetch_path=getenv('SADDR_TCHETCH_PATH');
-if(!empty($tchetch_path) && is_readable($tchetch_path)) {
-   include($tchetch_path);
-} else {
-   include('lib/tchetch/tch.php');
-}
-if(!defined('TCH__')) die('Missing tchetch/tch.php');
-
-/* in saddr tree */
 include(dirname(__FILE__).'/lib/saddr.php');
 
 /* Various options */
@@ -40,16 +28,9 @@ $Saddr=saddr_init();
 $saddr_filename=basename(__FILE__);
 saddr_setBaseFileName($Saddr, $saddr_filename);
 
-/* Include local index file */
-if(tch_isIncludable('conf/saddr.index.local.php')) {
+/* if conf/saddr.index.local.php exists include it */
+if (is_readable('conf/saddr.index.local.php')) {
    include('conf/saddr.index.local.php');
-} else {
-   $local_ldap_bind_file=getenv('SADDR_LOCAL_INDEX');
-   if(!empty($local_ldap_bind_file)) {
-      if(tch_isIncludable($local_ldap_bind_file)) {
-         include($local_ldap_bind_file);
-      }
-   }
 }
 
 /* Try to get username/password for LDAP server

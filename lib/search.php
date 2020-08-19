@@ -35,7 +35,7 @@ function saddr_search(&$saddr, $search, $search_on=array(), $attrs=array(),
       
       $ldap=saddr_getLdap($saddr);
       $bases=saddr_getAllLdapBase($saddr);
-      
+      $bases = saddr_reduceBases($bases);
       foreach($bases as $base) {
          $results = $ldap->search($base, $ldap_search_filter, $ldap_attrs, 'sub');
          foreach ($results as $rset) {
