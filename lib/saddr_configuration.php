@@ -155,7 +155,6 @@ function saddr_getConfiguredModules(&$saddr)
          }
       }
    }
-
    return $modules;
 }
 
@@ -173,12 +172,12 @@ function saddr_getAvailableModules(&$saddr)
       $nctx=saddr_getNamingContext($saddr);
 
       if(!is_null($nctx)) {
-         $s_res = $ldap->search($nctx, $filter, ['saddrModuleName', 'saddrConfigName'], 'sub');
+         $s_res = $ldap->search($nctx, $filter, ['saddrmodulename', 'saddrconfigname'], 'sub');
          foreach ($s_res as $result) {
             for($e = $result->firstEntry(); $e; $e = $result->nextEntry()) {
                $confname = $e->get('saddrconfigname');
-               $name = $e->get('saddrmodulname');
-
+               $name = $e->get('saddrmodulename');
+               
                $module = [
                   'module' => $confname ? $confname[0] : null, 
                   'name' => $name ? $name[0] : null, 
