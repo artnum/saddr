@@ -23,7 +23,6 @@ function saddr_list(&$saddr, $module, $attrs=array())
    $bases=saddr_getModuleBase($saddr, $module);
   
    foreach($bases as $base) {
-      print_r($ldap_search_filter);
       $results = $ldap->search($base, $ldap_search_filter, $ldap_attrs, 'one');
       foreach ($results as $rset) {
          for($entry = $rset->firstEntry(); $entry; $entry = $rset->nextEntry()) {
