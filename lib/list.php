@@ -18,26 +18,19 @@ function saddr_list(&$saddr, $module, $attrs=array())
 
    $oc=saddr_getClass($saddr, $module);
    $ldap_search_filter='(objectclass='.$oc['structural'].')';
-   $with_aux=FALSE;
-   foreach($oc['auxiliary'] as $c) {
-      $ldap_search_filter.='(objectclass='.$c.')';
-      $with_aux=TRUE;
-   }
-   if($with_aux) {
-      $ldap_search_filter='(&'.$ldap_search_filter.')';
-   }
 
    $ldap=saddr_getLdap($saddr);
    $bases=saddr_getModuleBase($saddr, $module);
   
    foreach($bases as $base) {
+      print_r($ldap_search_filter);
       $results = $ldap->search($base, $ldap_search_filter, $ldap_attrs, 'one');
       foreach ($results as $rset) {
          for($entry = $rset->firstEntry(); $entry; $entry = $rset->nextEntry()) {
             $_sent=saddr_makeSmartyEntry($saddr, $entry);
-            if(isset($_sent['name'])) {
+            //if(isset($_sent['name'])) {
                $smarty_entries[]=$_sent;
-            }
+            //}
          }
       }
       $results = null;
