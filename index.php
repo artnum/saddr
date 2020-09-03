@@ -118,10 +118,11 @@ $Smarty->registerPlugin('function', 'saddr_available_modules', 's2s_availableMod
 
 saddr_setSmarty($Saddr, $Smarty);
 
-$saddr_results=array(
-      'display'=>'home.tpl',
-      'handle'=>&$Saddr
-      );
+$saddr_results = [
+      'display' => 'home.tpl',
+      'handle' => &$Saddr,
+      'result_count' => 0
+   ];
 
 /* Selection management */
 if(isset($_GET['selected'])) {
@@ -163,19 +164,30 @@ if(isset($_GET['op'])) {
          break;
       case 'list':
          if(isset($_GET['module'])) {
-            $module=saddr_urlDecrypt($Saddr, $_GET['module']);
+            $module = '';
+            if (!empty($_GET['source']) && $_GET['source'] === 'xhr') {
+               $module = $_GET['module'];
+            } else {
+               $module = saddr_urlDecrypt($Saddr, $_GET['module']);
+            }
             if(is_string($module)) {
                $search=saddr_list($Saddr, $module);
                $saddr_results['display']='results.tpl';
                if(!empty($search)) {
                   $saddr_results['search_results']=$search;
+                  $saddr_results['result_count'] = count($search);
                }
             }
          }
          break;
       case 'doTagSearch':
          if(isset($_GET['search'])) {
-            $search_string=saddr_urlDecrypt($Saddr, $_GET['search']);
+            $search_string = '';
+            if (!empty($_GET['source']) && $_GET['source'] === 'xhr') {
+               $search_string = $_GET['search'];
+            } else {
+               $search_string = saddr_urlDecrypt($Saddr, $_GET['search']);
+            }
             if(is_string($search_string)) {
                $search=saddr_search($Saddr, $search_string,
                      array('tags', 'restricted_tags'));
@@ -186,13 +198,19 @@ if(isset($_GET['op'])) {
                $saddr_results['display']='results.tpl';
                if(!empty($search)) {
                   $saddr_results['search_results']=$search;
+                  $saddr_results['result_count'] = count($search);
                }
             }
          }
          break;
       case 'doGlobalSearch':
          if(isset($_GET['search'])) {
-            $search_string=saddr_urlDecrypt($Saddr, $_GET['search']);
+            $search_string = '';
+            if (!empty($_GET['source']) && $_GET['source'] === 'xhr') {
+               $search_string = $_GET['search'];
+            } else {
+               $search_string = saddr_urlDecrypt($Saddr, $_GET['search']);
+            }
             if(is_string($search_string)) {
                $search_op='=';
                if(strlen($search_string) > 0 && $search_string[0] == '%') {
@@ -208,6 +226,7 @@ if(isset($_GET['op'])) {
                $saddr_results['display']='results.tpl';
                if(!empty($search)) {
                   $saddr_results['search_results']=$search;
+                  $saddr_results['result_count'] = count($search);
                }
             }
          }
@@ -219,10 +238,20 @@ if(isset($_GET['op'])) {
 
          $attribute='company';
          if(isset($_GET['attribute'])) {
-            $attribute=saddr_urlDecrypt($Saddr, $_GET['attribute']);
+            $attribute = '';
+            if (!empty($_GET['source']) && $_GET['source'] === 'xhr') {
+               $attribute = $_GET['attribute'];
+            } else {
+               $attribute= saddr_urlDecrypt($Saddr, $_GET['attribute']);
+            }
          }
          if(isset($_GET['search'])) {
-            $search_string=saddr_urlDecrypt($Saddr, $_GET['search']);
+            $search_string = '';
+            if (!empty($_GET['source']) && $_GET['source'] === 'xhr') {
+               $search_string = $_GET['search'];
+            } else {
+               $search_string = saddr_urlDecrypt($Saddr, $_GET['search']);
+            }
             if(is_string($search_string)) {
                $search=saddr_search($Saddr, $search_string, array($attribute),
                      array(), $search_op);
@@ -233,6 +262,7 @@ if(isset($_GET['op'])) {
                $saddr_results['display']='results.tpl';
                if(!empty($search)) {
                   $saddr_results['search_results']=$search;
+                  $saddr_results['result_count'] = count($search);
                }
             }
          }
@@ -241,10 +271,22 @@ if(isset($_GET['op'])) {
          if (!empty($_GET['attribute']) && !empty($_GET['search']) &&
             !empty($_GET['leaf']) && !empty($_GET['leafvalue'])
          ) {
-            $attribute = saddr_urlDecrypt($Saddr, $_GET['attribute']);
-            $search = saddr_urlDecrypt($Saddr, $_GET['search']);
-            $leafattr = saddr_urlDecrypt($Saddr, $_GET['leaf']);
-            $leafvalue = saddr_urlDecrypt($Saddr, $_GET['leafvalue']);
+
+            $attribute = '';
+            $search = '';
+            $leafattr = '';
+            $leafvalue ='';
+            if (!empty($_GET['source']) && $_GET['source'] === 'xhr') {
+               $attribute = $_GET['attribute'];
+               $search = $_GET['search'];
+               $leafattr = $_GET['leaf'];
+               $leafvalue = $_GET['leafvalue'];
+            } else {
+               $attribute = saddr_urlDecrypt($Saddr, $_GET['attribute']);
+               $search = saddr_urlDecrypt($Saddr, $_GET['search']);
+               $leafattr = saddr_urlDecrypt($Saddr, $_GET['leaf']);
+               $leafvalue = saddr_urlDecrypt($Saddr, $_GET['leafvalue']);
+            }
 
             $root = saddr_read($Saddr, $search);
             $leaves[] = $root;
@@ -273,6 +315,7 @@ if(isset($_GET['op'])) {
             $saddr_results['display']='results.tpl';
             if(!empty($entries)) {
                $saddr_results['search_results']=$entries;
+               $saddr_results['result_count'] = count($search);
             }
          }
          break;
@@ -344,7 +387,12 @@ if(isset($_GET['op'])) {
             saddr_selectID($Saddr, saddr_urlDecrypt($Saddr, $_GET['id']));
          }
       case 'view':
-         $dn=saddr_urlDecrypt($Saddr, $_GET['id']);
+         $dn = '';
+         if (!empty($_GET['source']) && $_GET['source'] === 'xhr') {
+            $dn = $_GET['id'];
+         } else {
+            $dn = saddr_urlDecrypt($Saddr, $_GET['id']);
+         }
          $entry=saddr_read($Saddr, $dn);
          if(!empty($entry)) {
             $tpl=saddr_getTemplates($Saddr, $entry['module']);
@@ -468,8 +516,12 @@ $_runtime_stop=gettimeofday();
 $saddr_results['__runtime']=round(((($_runtime_stop['sec'] * 1000) + ($_runtime_stop['usec'] / 1000)) -
       (($_runtime_start['sec'] *  1000) + ($_runtime_start['usec'] / 1000))), 3);
 saddr_getSmarty($Saddr)->assign('saddr', $saddr_results);
-
 /* DISPLAY */
-
-saddr_getSmarty($Saddr)->display('index.tpl');
+if (!empty($_GET['out']) && $_GET['out'] === 'json') {
+   if (!empty($saddr_results['search_results'])) {
+      echo json_encode($saddr_results['search_results']);
+   }
+} else {
+   saddr_getSmarty($Saddr)->display('index.tpl');
+}
 ?>
