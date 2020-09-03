@@ -61,4 +61,3 @@ Tag : <input type="text" name="saddrTagSearch" />
 {/foreach}
 </div>
 {/if}
-

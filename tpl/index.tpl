@@ -1,37 +1,16 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!DOCTYPE html
-	PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" 
-	lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <script src="conf/app.js"></script>
-  <script src="js/gevent.js"></script>
-  <script src="js/location.js"></script>
-  <script src="js/multi.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/dojo/1.14.1/dojo/dojo.js" data-dojo-config="parseOnLoad: true"></script>
-<script>
- dojo.require('dojo._base.declare')
- dojo.require('dijit.form.Form');
- dojo.require('dijit.form.TextBox');
- dojo.require('dojo.date.locale')
- dojo.require('dijit.form.NumberTextBox');
- dojo.require('dijit.form.Textarea');
- dojo.require('dijit.form.DateTextBox');
- dojo.require('dijit.form.FilteringSelect');
- dojo.require('dijit.Tooltip');
- dojo.require("dojox.form.Uploader");
-
- if (window.Conf && window.Conf.domain) {
-   document.domain = window.Conf.domain
- }
-</script>
-<title>saddr</title>
-<link rel="stylesheet" href="css/default/default.css" type="text/css" />
-<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.14.1/dojo/resources/dojo.css" />
-<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.14.1/dijit/themes/claro/claro.css" />
+	<script src="conf/app.js"></script>
+	<script src="js/gevent.js"></script>
+	<script src="js/location.js"></script>
+	<script src="js/multi.js"></script>
+	<script src="node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
+	<script src="node_modules/aselect/src/aselect.js"></script>
+	<title>saddr</title>
+	<link rel="stylesheet" href="css/default/default.css" type="text/css" />	
 </head>
-<body class="{saddr_dijit_theme_name}">
+<body>
 {include file="header.tpl"}
 
 <div id="saddr_content">
