@@ -1,4 +1,4 @@
-<h1>Search results</h1>
+<h1>Résultat de la recherche</h1>
 {if isset($saddr.search_results)}
 {foreach $saddr.search_results as $e}
 <div class="saddr_resultLine {if $e@iteration is odd by 1}saddr_resultLineOdd{/if}">
@@ -16,5 +16,5 @@
 {/foreach}
 </table>
 {else}
-<p>No results</p>
+<p>Aucun résultat</p>
 {/if}

@@ -10,12 +10,12 @@
 </div>
 
 <div class="saddr_section saddr_sectionRight">
-<h1>Search</h1>
+<h1>Recherche</h1>
 {foreach array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
   'q','r','s','t','u','v','w','x','z') as $letter}
 <a href="{saddr_url op="doGlobalSearch" search="$letter" encrypt=1}">{$letter}</a>&nbsp;
 {/foreach}
-<h1>List</h1>
+<h1>Liste</h1>
 <ul>
 {foreach $saddr.__home_display as $home}
 <li><a href="{saddr_url op="list" module=$home.1 encrypt=1}">{$home.2}</a></li>

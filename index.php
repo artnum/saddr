@@ -315,7 +315,7 @@ if(isset($_GET['op'])) {
             $saddr_results['display']='results.tpl';
             if(!empty($entries)) {
                $saddr_results['search_results']=$entries;
-               $saddr_results['result_count'] = count($search);
+               $saddr_results['result_count'] = count($entries);
             }
          }
          break;
