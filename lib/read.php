@@ -30,6 +30,7 @@ function saddr_read(&$saddr, $dn, $attrs=array(), $deepness=0)
                   $deepness--;
                   $resolved_seealso=array();
                   $workAt = null;
+                  $rel_entry = [];
                   foreach ($seealso as $see) {
                      foreach($see['value'] as $see_dn) {
                         $rel_entry=saddr_read($saddr, $see_dn, array(), $deepness);
@@ -41,6 +42,7 @@ function saddr_read(&$saddr, $dn, $attrs=array(), $deepness=0)
                         }
                      }
                   }
+                  $ret['seealso'] = $rel_entry;
 
                   if ($workAt !== null) {
                      foreach ($workAt as $k => $v) {
@@ -70,7 +72,6 @@ function saddr_read(&$saddr, $dn, $attrs=array(), $deepness=0)
                         }
                      }
                   }
-                  $ret['seealso'] = $rel_entry;
                }
             }
          }

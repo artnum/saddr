@@ -283,10 +283,12 @@ function s2s_displaySmartyEntry($params, $smarty)
       $edit_only=TRUE;
    }
 
+   $label = null;
    if(isset($params['label']) && is_string($params['label'])) {
       $label=$params['label'];
    }
 
+   $module = null;
    if(isset($params['module']) && is_string($params['module'])) {
       $module=$params['module'];
    }
@@ -364,7 +366,7 @@ function s2s_displaySmartyEntry($params, $smarty)
             $html.='</textarea>';
             break;
          case 'saddrSelect':
-            if(!isset($module)) return;
+            if($module !== null) { return; }
             $res=saddr_list($saddr['handle'], $module);
             foreach($v_entry as $index => $v) {
                if(isset($params['format']) &&
@@ -422,7 +424,7 @@ function s2s_displaySmartyEntry($params, $smarty)
       if(!isset($entry[$params['e']])) return;
       
       if($display_label_on_view) {
-         if(isset($label)) {
+         if($label !== null) {
             $html.='<div class="saddr_label">'.$label.'</div>';
             $with_label=TRUE;
          }

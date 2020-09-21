@@ -26,7 +26,7 @@ function saddr_add(&$saddr, $smarty_entry)
          $hAttr = saddr_getHashGeneratedAttributes($saddr, $smarty_entry['module']);
          if ($hAttr) {
             $ctx = hash_init('sha256');
-            hash_update($ctx, time());
+            hash_update($ctx, (string)time());
             foreach($ldap_entry as $k => $v) {
                hash_update($ctx, $k);
                if(is_string($v)) {

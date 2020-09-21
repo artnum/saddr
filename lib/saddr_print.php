@@ -145,10 +145,11 @@ function saddr_sprint(&$saddr, $format, $entry)
    }
 
    foreach($replace as $k => $v) {
+      $valueLen = count($v);
       if(is_array($entry[$k])) {
-         $res_format=str_replace('@'.$k.'@', $entry[$k][0], $res_format, count($v));
+         $res_format=str_replace('@'.$k.'@', $entry[$k][0], $res_format, $valueLen);
       } else {
-         $res_format=str_replace('@'.$k.'@', $entry[$k], $res_format, count($v));
+         $res_format=str_replace('@'.$k.'@', $entry[$k], $res_format, $valueLen);
       }
    }
 
