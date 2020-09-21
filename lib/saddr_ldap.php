@@ -97,6 +97,8 @@ function saddr_isCurrentlyWorking ($seealsoName) {
             } else {
                return true;
             }
+         } else {
+            return true;
          }
       }
 
