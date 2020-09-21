@@ -8,6 +8,7 @@
 	<script src="node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
 	<script src="node_modules/aselect/src/aselect.js"></script>
 	<title>saddr</title>
+	<link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css" />
 	<link rel="stylesheet" href="css/default/default.css" type="text/css" />	
 </head>
 <body>

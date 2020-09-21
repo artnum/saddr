@@ -1,0 +1,5 @@
+# Add relation attribute option
+dn: cn=config
+changetype: modify
+add: olcAttributeOptions
+olcAttributeOptions: relation-

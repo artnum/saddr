@@ -25,16 +25,52 @@ function saddr_read(&$saddr, $dn, $attrs=array(), $deepness=0)
          $entry = $rset->firstEntry();
             $ret=saddr_makeSmartyEntry($saddr, $entry);
             if($deepness>0) {
-               if(isset($ret['seealso'])) {
+               $seealso = $entry->getAll('seealso');
+               if(!empty($seealso)) {
                   $deepness--;
                   $resolved_seealso=array();
-                  foreach($ret['seealso'] as $see_dn) {
-                     $rel_entry=saddr_read($saddr, $see_dn, array(), $deepness);
-                     if($rel_entry!==FALSE) {
-                        $resolved_seealso[]=$rel_entry;
+                  $workAt = null;
+                  foreach ($seealso as $see) {
+                     foreach($see['value'] as $see_dn) {
+                        $rel_entry=saddr_read($saddr, $see_dn, array(), $deepness);
+                        if($rel_entry!==FALSE) {
+                           $resolved_seealso[]=$rel_entry;
+                           if (saddr_isCurrentlyWorking($see['name'])) {
+                              $workAt = $rel_entry;
+                           }
+                        }
                      }
                   }
-                  $ret['seealso']=$rel_entry;
+
+                  if ($workAt !== null) {
+                     foreach ($workAt as $k => $v) {
+                        $waId = $workAt['id'];
+                        /* coming from deeper is resolved as the last step in order to 
+                         * keep link logical. If E0[name] <-- E1[name] <-- E2[name]="The Name"
+                         * we want to go from E0 to E1 and on E1 see that it come from E2.
+                         */
+                        if ($deepness === 1) {
+                           $waId = $ret['id'];
+                           foreach ($workAt['__relation'] as &$v) {
+                              if (!is_array($v)) { continue; }
+                              for ($i = 0; $i < count($v); $i++) {
+                                 $v[$i]['source'] = $waId;
+                              }
+                           }
+                        }
+                        if (empty($ret[$k])) {
+                           $ret[$k] = $v;
+                           if (!isset($ret['__relation'][$k])) {
+                              $ret['__relation'][$k] = [];
+                           }
+                           $ret['__relation'][$k][] = [
+                              'type' => 'worker',
+                              'source' => $waId
+                           ];
+                        }
+                     }
+                  }
+                  $ret['seealso'] = $rel_entry;
                }
             }
          }

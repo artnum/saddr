@@ -67,4 +67,42 @@ function saddr_reduceBases ($bases) {
    return $out;
 }
 
+function saddr_isCurrentlyWorking ($seealsoName) {
+   $parts = explode(';', $seealsoName);
+   
+   if (count($parts) <= 1) { return false; }
+   for ($i = 1; $i < count($parts); $i++) {
+      if (strpos(strtolower($parts[$i]), 'relation-worker') !== 0) { continue; }
+      $workDescription = explode('.', $parts[$i]);
+      $begin = null;
+      if (!empty($workDescription[1])) {
+         $begin = DateTime::createFromFormat('Ymd', $workDescription[1]);
+      }
+      $end = null;
+      if (!empty($workDescription[2])) {
+         $end = DateTime::createFromFormat('Ymd', $workDescription[2]);
+      }
+      /* no begin or end date means forever */
+      if ($begin === null && $end === null) {
+         return true;
+      } else {
+         if ($begin !== null) {
+            if ($begin->getTimestamp() > (new DateTime('now'))->getTimestamp()) {
+               continue;
+            }
+         }
+         if ($end !== null) {
+            if ($end->getTimestamp() < (new DateTime('now'))->getTimestamp()) {
+               continue;
+            } else {
+               return true;
+            }
+         }
+      }
+
+   }
+
+   return false;
+}
+
 ?>

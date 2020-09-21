@@ -334,7 +334,7 @@ function s2s_displaySmartyEntry($params, $smarty)
       switch($type[0]) {
          case 'dijitDateTextBox':
          case 'dijitTextBox':
-            foreach($v_entry as $v) {
+            foreach($v_entry as $index => $v) {
                $html.='<input type="text" name="'.$name.'" '. $htmlMulti .
                   'value="'.$v.'" '.
                   $required.' '.
@@ -344,7 +344,7 @@ function s2s_displaySmartyEntry($params, $smarty)
             }
             break;
          case 'dijitTextArea':
-            foreach($v_entry as $v) {
+            foreach($v_entry as $index => $v) {
                $html.='<textarea name="'.$name.'" '. $htmlMulti .
                   'class="saddr_value saddr_textarea" '.
                   $required.'>'.
@@ -357,7 +357,7 @@ function s2s_displaySmartyEntry($params, $smarty)
             $html.='<textarea name="'.$name.'" '. $htmlMulti . 
                'class="saddr_value saddr_textarea" '.
                 $required.'>';
-            foreach($v_entry as $v) {
+            foreach($v_entry as $index => $v) {
                $html.=$v;
                if($v!='') $html.=', ';
             }
@@ -366,7 +366,7 @@ function s2s_displaySmartyEntry($params, $smarty)
          case 'saddrSelect':
             if(!isset($module)) return;
             $res=saddr_list($saddr['handle'], $module);
-            foreach($v_entry as $v) {
+            foreach($v_entry as $index => $v) {
                if(isset($params['format']) &&
                      is_string($params['format'])) {
                   $html.='<select name="'.$name.'"'. $htmlMulti .
@@ -433,7 +433,14 @@ function s2s_displaySmartyEntry($params, $smarty)
 
       switch($type[0]) {
          default:
-            foreach($entry[$params['e']] as $v) {
+            foreach($entry[$params['e']] as $index => $v) {
+               $linkedValue = null;
+               if (isset($entry['__relation'][$params['e']])) {
+                  if (!empty($entry['__relation'][$params['e']][$index])) {
+                     $entryClass .= ' relation ' . $entry['__relation'][$params['e']][$index]['type'];
+                     $linkedValue =  $entry['__relation'][$params['e']][$index]['source'];
+                  }
+               }
                if($type[0]=='dijitTextArea') $v=nl2br($v);
                $html.='<div class="saddr_value saddr_'.$type[0] . $entryClass;
                if(!isset($with_label)) {
@@ -450,10 +457,14 @@ function s2s_displaySmartyEntry($params, $smarty)
 
                }
                if (isset($type[2])) {
-                  $html .= '<a href="' . $type[2] . $v . '">';
+                  $html .= '<a class=" href="' . $type[2] . $v . '">';
                }
                $html.=$v;
                if(isset($type[2]) || isset($params['searchable'])) { $html.='</a>'; };
+               
+               if ($linkedValue !== null) {
+                  $html .= ' <a class="relation" href="' . s2s_generateUrl([ 'op' => 'view', 'id' => $linkedValue], $smarty) . '"><i class="fas fa-link"></i></a>';
+               }
 
                $html.='&nbsp;</div>';
                if(!$multi) break;
@@ -465,7 +476,7 @@ function s2s_displaySmartyEntry($params, $smarty)
                $html.=' saddr_valueNoLabel';
             }
             $html.='">';
-            foreach($entry[$params['e']] as $v) {
+            foreach($entry[$params['e']] as $index => $v) {
                $html.='<a href="';
                $html.=s2s_generateUrl(array('op'=>'doSearchByAttribute',
                         'attribute'=>$params['e'],
@@ -478,7 +489,14 @@ function s2s_displaySmartyEntry($params, $smarty)
             $html.='</div>';
             break;
          case 'saddrSelect':
-               foreach($entry[$params['e']] as $v) {
+               foreach($entry[$params['e']] as $index => $v) {
+                  $linkedValue = null;
+                  if (isset($entry['__relation'][$params['e']])) {
+                     if (!empty($entry['__relation'][$params['e']][$index])) {
+                        $entryClass .= ' relation ' . $entry['__relation'][$params['e']][$index]['type'];
+                        $linkedValue =  $entry['__relation'][$params['e']][$index]['source'];
+                     }
+                  }
                   $html.='<div class="saddr_value saddr_'.$type[0] . $entryClass;
                   if(!isset($with_label)) {
                      $html.=' saddr_valueNoLabel';
@@ -532,6 +550,9 @@ function s2s_displaySmartyEntry($params, $smarty)
                            break;
                         }
                      }
+                  }
+                  if ($linkedValue !== null) {
+                     $html .= ' <a class="relation" href="' . s2s_generateUrl([ 'op' => 'view', 'id' => $linkedValue], $smarty) . '"><i class="fas fa-link"></i></a>';
                   }
                   $html.='</div>';
                   if(!$multi) break;

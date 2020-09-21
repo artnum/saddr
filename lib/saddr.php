@@ -71,6 +71,22 @@ function saddr_init()
    return $saddr;
 }
 
+function saddr_setOutput (&$saddr, $type) {
+   if (empty($saddr['out'])) {
+      $saddr['out'] = [];
+   }
+   switch (strtolower($type)) {
+      case 'json': $saddr['out']['type'] = 'json'; break;
+      case 'smarty': default: $saddr['out']['type'] = 'smarty'; break;
+   }
+}
+
+function saddr_getOutput(&$saddr) {
+   if (empty($saddr['out'])) { return 'smarty'; }
+   else if (empty($saddr['out']['type'])) { return 'smarty'; }
+   return $saddr['out']['type'];
+}
+
 /* Set of functions to access saddr opaque structure */
 function saddr_getLdap(&$saddr)
 {
@@ -748,6 +764,7 @@ function saddr_makeSmartyEntry(&$saddr, $entry)
       $smarty_entry['id'] = saddr_urlEncrypt($saddr, $dn);
       $smarty_entry['module'] = $module;
       $smarty_entry['dn'] = $dn;
+      $smarty_entry['__relation'] = [];
 
       if($has_group) {
          $smarty_entry['__group']=array();
@@ -760,7 +777,7 @@ function saddr_makeSmartyEntry(&$saddr, $entry)
       $seealso = $entry->get('seealso');
       if($seealso) {
          $smarty_entry['seealso']=array();
-         for($i = 0; $i < $seealso['count']; $i++) {
+         for($i = 0; $i < count($seealso); $i++) {
             $smarty_entry['seealso'][$i] = $seealso[$i];
          }
       }

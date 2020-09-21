@@ -84,6 +84,7 @@ function saddr_modify(&$saddr, $smarty_entry)
                   $attrs[] = substr($attr, 1);
                   continue;
                }
+               /* skip for now, would be ignored later */
                if (in_array($attr, $rdn_components)) { continue; }
                if (substr($attr, 0, 1) === '-') {
                   $_attr = substr($attr, 1);
@@ -117,6 +118,8 @@ function saddr_modify(&$saddr, $smarty_entry)
             foreach($old->eachAttribute() as $attr => $value) {
                if (in_array($attr, array_keys($rdn_components))) { continue; }
                if ($attr === 'objectclass') { continue; }
+               /* seealso must not be modified as it has not complete support yet */
+               if (strpos(strtolower($attr), 'seealso') === 0) { continue; }
                if (!in_array($attr, $attrs)) {
                   $old->delete($attr);
                }

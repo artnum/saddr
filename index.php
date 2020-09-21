@@ -371,7 +371,7 @@ if(isset($_GET['op'])) {
 
          if(!empty($ret[0])) {
             $dn=$ret[0];
-            $entry=saddr_read($Saddr, $dn);
+            $entry=saddr_read($Saddr, $dn, [], 3);
             if(!empty($entry)) {
                $tpl=saddr_getTemplates($Saddr, $entry['module']);
                $saddr_results['display']=saddr_getModuleDirectory($Saddr).'/'.
@@ -393,7 +393,7 @@ if(isset($_GET['op'])) {
          } else {
             $dn = saddr_urlDecrypt($Saddr, $_GET['id']);
          }
-         $entry=saddr_read($Saddr, $dn);
+         $entry=saddr_read($Saddr, $dn, [], 3);
          if(!empty($entry)) {
             $tpl=saddr_getTemplates($Saddr, $entry['module']);
             $saddr_results['display']=saddr_getModuleDirectory($Saddr).'/'.
