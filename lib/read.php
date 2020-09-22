@@ -28,16 +28,18 @@ function saddr_read(&$saddr, $dn, $attrs=array(), $deepness=0)
                $seealso = $entry->getAll('seealso');
                if(!empty($seealso)) {
                   $deepness--;
-                  $resolved_seealso=array();
+                  $resolved_seealso = [];
                   $workAt = null;
                   $rel_entry = [];
+                  $relationType = '';
                   foreach ($seealso as $see) {
                      foreach($see['value'] as $see_dn) {
                         $rel_entry=saddr_read($saddr, $see_dn, array(), $deepness);
                         if($rel_entry!==FALSE) {
                            $resolved_seealso[]=$rel_entry;
-                           if (saddr_isCurrentlyWorking($see['name'])) {
+                           if (($realtionType = saddr_isCurrentlyInRelation($see['name'])) !== null) {
                               $workAt = $rel_entry;
+                              $workAt['__relationType'] = $realtionType;
                            }
                         }
                      }
@@ -66,7 +68,7 @@ function saddr_read(&$saddr, $dn, $attrs=array(), $deepness=0)
                               $ret['__relation'][$k] = [];
                            }
                            $ret['__relation'][$k][] = [
-                              'type' => 'worker',
+                              'type' => $workAt['__relationType'],
                               'source' => $waId
                            ];
                         }

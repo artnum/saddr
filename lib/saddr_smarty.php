@@ -439,7 +439,7 @@ function s2s_displaySmartyEntry($params, $smarty)
                $linkedValue = null;
                if (isset($entry['__relation'][$params['e']])) {
                   if (!empty($entry['__relation'][$params['e']][$index])) {
-                     $entryClass .= ' relation ' . $entry['__relation'][$params['e']][$index]['type'];
+                     $entryClass .= ' relation ' . $entry['__relation'][$params['e']][$index]['type'][0];
                      $linkedValue =  $entry['__relation'][$params['e']][$index]['source'];
                   }
                }
@@ -465,7 +465,21 @@ function s2s_displaySmartyEntry($params, $smarty)
                if(isset($type[2]) || isset($params['searchable'])) { $html.='</a>'; };
                
                if ($linkedValue !== null) {
-                  $html .= ' <a class="relation" href="' . s2s_generateUrl([ 'op' => 'view', 'id' => $linkedValue], $smarty) . '"><i class="fas fa-link"></i></a>';
+                  $begin = $entry['__relation'][$params['e']][$index]['type'][1];
+                  $end = $entry['__relation'][$params['e']][$index]['type'][2];
+                  $title = '';
+                  if ($begin !== null) {
+                     $title .= 'Du ' . $begin->format('d.m.Y');
+                  }
+                  if ($end !== null) {
+                     if (empty($title)) {
+                        $title .= 'Jusqu\'au ';
+                     } else {
+                        $title .= ' jusqu\'au ';
+                     }
+                     $title .= $end->format('d.m.Y');
+                  }
+                  $html .= ' <a title="' . $title . '" class="relation" href="' . s2s_generateUrl([ 'op' => 'view', 'id' => $linkedValue], $smarty) . '"><i class="fas fa-link"></i></a>';
                }
 
                $html.='&nbsp;</div>';
@@ -495,7 +509,7 @@ function s2s_displaySmartyEntry($params, $smarty)
                   $linkedValue = null;
                   if (isset($entry['__relation'][$params['e']])) {
                      if (!empty($entry['__relation'][$params['e']][$index])) {
-                        $entryClass .= ' relation ' . $entry['__relation'][$params['e']][$index]['type'];
+                        $entryClass .= ' relation ' . $entry['__relation'][$params['e']][$index]['type'][0];
                         $linkedValue =  $entry['__relation'][$params['e']][$index]['source'];
                      }
                   }
@@ -554,7 +568,21 @@ function s2s_displaySmartyEntry($params, $smarty)
                      }
                   }
                   if ($linkedValue !== null) {
-                     $html .= ' <a class="relation" href="' . s2s_generateUrl([ 'op' => 'view', 'id' => $linkedValue], $smarty) . '"><i class="fas fa-link"></i></a>';
+                     $begin = $entry['__relation'][$params['e']][$index]['type'][1];
+                     $end = $entry['__relation'][$params['e']][$index]['type'][2];
+                     $title = '';
+                     if ($begin !== null) {
+                        $title .= 'Du ' . $begin->format('d.m.Y');
+                     }
+                     if ($end !== null) {
+                        if (empty($title)) {
+                           $title .= 'Jusqu\'au ';
+                        } else {
+                           $title .= ' jusqu\'au ';
+                        }
+                        $title .= $end->format('d.m.Y');
+                     }
+                     $html .= ' <a title="' . $title .'" class="relation" href="' . s2s_generateUrl([ 'op' => 'view', 'id' => $linkedValue], $smarty) . '"><i class="fas fa-link"></i></a>';
                   }
                   $html.='</div>';
                   if(!$multi) break;

@@ -67,20 +67,25 @@ function saddr_reduceBases ($bases) {
    return $out;
 }
 
-function saddr_isCurrentlyWorking ($seealsoName) {
+define('SADDR_RELATION_ATTRIBUTE_OPTION', 'relation-');
+function saddr_isCurrentlyInRelation ($seealsoName) {
+   $relationType = null;
    $parts = explode(';', $seealsoName);
    
    if (count($parts) <= 1) { return false; }
    for ($i = 1; $i < count($parts); $i++) {
-      if (strpos(strtolower($parts[$i]), 'relation-worker') !== 0) { continue; }
+      if (strpos(strtolower($parts[$i]), SADDR_RELATION_ATTRIBUTE_OPTION) !== 0) { continue; }
       $workDescription = explode('.', $parts[$i]);
+      $relationType = [substr($workDescription[0], strlen(SADDR_RELATION_ATTRIBUTE_OPTION)), null, null];
       $begin = null;
       if (!empty($workDescription[1])) {
          $begin = DateTime::createFromFormat('Ymd', $workDescription[1]);
+         $relationType[1] = $begin;
       }
       $end = null;
       if (!empty($workDescription[2])) {
          $end = DateTime::createFromFormat('Ymd', $workDescription[2]);
+         $relationType[2] = $end;
       }
       /* no begin or end date means forever */
       if ($begin === null && $end === null) {
@@ -95,16 +100,16 @@ function saddr_isCurrentlyWorking ($seealsoName) {
             if ($end->getTimestamp() < (new DateTime('now'))->getTimestamp()) {
                continue;
             } else {
-               return true;
+               return $relationType;
             }
          } else {
-            return true;
+            return $relationType;
          }
       }
 
    }
 
-   return false;
+   return null;
 }
 
 ?>
