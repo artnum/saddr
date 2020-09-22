@@ -235,14 +235,20 @@ function s2s_generateUrl($params, $smarty)
             if(isset($params['timed_id'])) {
                $url.='?op='.$params['op'].'&timed_id='.$params['timed_id'];
             }
+         case 'relation':
+            if (!empty($params['id'])) {
+               $url .= '?op=' . $params['op'] . '&id=' . $params['id'];
+            }
             break;
       }
-   } 
-   foreach($saddr['handle']['select'] as $s_id) {
-      if($url==$base_filename) $url.='?selected[]=';
-      else $url.='&selected[]=';
-      $url.=s2s_encUrl(array('value' => $s_id), $smarty);
-   } 
+   }
+   if (!empty($saddr['handle']['select'])) {
+      foreach($saddr['handle']['select'] as $s_id) {
+         if($url==$base_filename) $url.='?selected[]=';
+         else $url.='&selected[]=';
+         $url.=s2s_encUrl(array('value' => $s_id), $smarty);
+      } 
+   }
    return $url;
 }
 

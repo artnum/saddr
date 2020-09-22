@@ -89,7 +89,7 @@ function saddr_isCurrentlyInRelation ($seealsoName) {
       }
       /* no begin or end date means forever */
       if ($begin === null && $end === null) {
-         return true;
+         return $relationType;
       } else {
          if ($begin !== null) {
             if ($begin->getTimestamp() > (new DateTime('now'))->getTimestamp()) {

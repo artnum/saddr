@@ -22,6 +22,11 @@
    title="Copy {$saddr.search_results.name.0}">Copier</a>
 </span>
 
+<span>
+   <a href="{saddr_url op=relation id=$saddr.search_results.id}"
+   title="Voir les relations de {$saddr.search_results.name.0}">Relation</a>
+</span>
+
 <!--
 <span>
    {if ! isset($saddr.__selected) || ! $saddr.__selected}

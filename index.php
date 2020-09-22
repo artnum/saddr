@@ -159,6 +159,7 @@ if(isset($_GET['op'])) {
             header('Location: ' . saddr_getBaseFileName($Saddr) . '?op=modules');
             exit(0); 
          }
+         /* fallthrough */
       case 'modules':
          $saddr_results['display']='modules.tpl';
          break;
@@ -233,6 +234,7 @@ if(isset($_GET['op'])) {
          break;
       case 'doSearchForCompany':
          $search_op='=';
+         /* fallthrough */
       case 'doSearchByAttribute':
          if(!isset($search_op)) $search_op='=';
 
@@ -386,6 +388,7 @@ if(isset($_GET['op'])) {
          if(isset($_GET['id'])) {
             saddr_selectID($Saddr, saddr_urlDecrypt($Saddr, $_GET['id']));
          }
+         /* fallthrough */
       case 'view':
          $dn = '';
          if (!empty($_GET['source']) && $_GET['source'] === 'xhr') {
@@ -419,6 +422,7 @@ if(isset($_GET['op'])) {
                }
             }
          }
+         /* fallthrough */
       case 'copy':
          if(isset($_GET['id'])) {
             $dn = saddr_urlDecrypt($Saddr, $_GET['id']);
@@ -427,6 +431,7 @@ if(isset($_GET['op'])) {
             unset($preadd_entry['dn']);
             unset($_GET['id']);
          }
+         /* fallthrough */
       case 'addOrEdit':
          $entry=array();
          if(isset($_GET['id'])) {
@@ -463,7 +468,7 @@ if(isset($_GET['op'])) {
          break;
       case 'doDelete':
          $delete_confirmed=TRUE;
-         /* no break */
+         /* fallthrough */
       case 'delete':
          if(isset($_GET['timed_id'])) {
             $tid=saddr_urlDecrypt($Saddr, $_GET['timed_id']);
@@ -497,6 +502,10 @@ if(isset($_GET['op'])) {
             }
          }
          break;
+      case 'relation':
+         include('index.d/relation.php');
+         $saddr_results = doOperationRelation($Saddr, $_GET['id']);
+      break;
    }
 }
 

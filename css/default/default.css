@@ -1,8 +1,9 @@
-/* (c) 2012-2019 Etienne Bagnoud
+/* (c) 2012-2020 Etienne Bagnoud
    This file is part of saddr project. saddr is under the MIT license.
 
    See LICENSE file
 */
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&family=VT323&display=swap');
 @import 'boxes.css';
 
 
@@ -12,6 +13,10 @@ body { padding:0;margin:0; font-family: sans-serif; font-size: 100% !important;}
 h1 { font-size: 1.6em; }
 h2 { font-size: 1.2em; }
 h3 { font-size: 1em; }
+
+.mono {
+   font-family: 'Courier Prime', monospace;
+}
 
 div#saddr_searchBoxes {
     background-color: #cccccc;
@@ -23,7 +28,7 @@ div#saddr_searchBoxes {
 }
 
 div#saddr_searchBoxes input:focus[type="text"] {
-    width: 30%;
+    width: 25%;
 }
 
 
@@ -83,7 +88,7 @@ span#saddr_toolbox span {
    float: left; 
    background-color: white;
    margin-left: 1ch;
-   min-width: 12ch;
+   min-width: 10ch;
    text-align: center;
    min-height: 3ex;
    padding: 3px; padding-left: 8px; padding-right: 8px;
@@ -146,7 +151,8 @@ div.saddr_sectionRight {
 
 .saddr_value {
    display: inline-block; 
-   float: right; clear: right;
+   float: right;
+   clear: right;
 }
 
 div#edit .saddr_value {
@@ -179,20 +185,29 @@ div#edit .saddr_value {
    display: inline-block;
 }
 
+.saddr_resField.smallField {
+   max-width: 24ch;
+}
+
+.saddr_resField.relation {
+   background-color:white !important;
+   color: blue !important;
+}
+
 .saddr_res0 {
-   width: 24%;
+   min-width: 20%;
 }
 
 .saddr_res1 {
-   width: 29%;
+   min-width: 25%;
 }
 
 .saddr_res2 {
-   width: 15%;
+   min-width: 15%;
 }
 
 .saddr_res3 {
-   width: 28%;
+   min-width: 25%;
 }
 
 .relation, .relation a {

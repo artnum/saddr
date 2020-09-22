@@ -4,8 +4,7 @@
 
    See LICENSE file
  */
-function saddr_search(&$saddr, $search, $search_on=array(), $attrs=array(),
-      $search_op='=')
+function saddr_search(&$saddr, $search, $search_on = [], $attrs = [], $search_op = '=')
 {
    $smarty_entries=array();
 
