@@ -372,7 +372,7 @@ function s2s_displaySmartyEntry($params, $smarty)
             $html.='</textarea>';
             break;
          case 'saddrSelect':
-            if($module !== null) { return; }
+            if($module === null) { return; }
             $res=saddr_list($saddr['handle'], $module);
             foreach($v_entry as $index => $v) {
                if(isset($params['format']) &&
