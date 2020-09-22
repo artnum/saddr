@@ -40,9 +40,11 @@ function saddr_search(&$saddr, $search, $search_on=array(), $attrs=array(),
          $results = $ldap->search($base, $ldap_search_filter, $ldap_attrs, 'sub');
          foreach ($results as $rset) {
             for ($entry = $rset->firstEntry(); $entry; $entry = $rset->nextEntry()) {
+
                $_sent=saddr_makeSmartyEntry($saddr, $entry);
-               if(isset($_sent['name'])) {
+               if(!empty($_sent['name'])) {
                   $smarty_entries[]=$_sent;
+                  $smarty_entries = array_merge($smarty_entries, _subsearch($saddr, $ldap, $base, sprintf('(seealso=%s)', $_sent['dn']), $ldap_attrs));
                }
             }
          }
@@ -54,4 +56,18 @@ function saddr_search(&$saddr, $search, $search_on=array(), $attrs=array(),
    return $smarty_entries;
 }
 
+function _subsearch($saddr, $ldap, $base, $filter, $ldap_attrs) {
+   $subentries = [];
+   $subsearch = $ldap->search($base, $filter, $ldap_attrs, 'sub');
+   foreach ($subsearch as $subresults) {
+      for ($subentry = $subresults->firstEntry(); $subentry; $subentry = $subresults->nextEntry()) {
+         $subentry_smarty = saddr_makeSmartyEntry($saddr, $subentry);
+         if (!empty($subentry_smarty['name'])) {
+            $subentries[] = $subentry_smarty;
+            $subentries = array_merge($subentries, _subsearch($saddr, $ldap, $base, sprintf('(seealso=%s)', $subentry_smarty['dn']), $ldap_attrs));
+         }
+      }
+   }
+   return $subentries;
+}
 ?>
