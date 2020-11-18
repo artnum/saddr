@@ -5,6 +5,7 @@ function doOperationRelation (&$saddr, $id) {
         'search_results' => [],
         'result_count' => 0,
         'relation_name' => [
+            'contact' => 'contact',
             'worker' => 'travaille',
             'branch' => 'succursale'
         ]
