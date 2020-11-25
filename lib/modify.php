@@ -120,6 +120,9 @@ function saddr_modify(&$saddr, $smarty_entry)
                if ($attr === 'objectclass') { continue; }
                /* seealso must not be modified as it has not complete support yet */
                if (strpos(strtolower($attr), 'seealso') === 0) { continue; }
+               /* attributes used for import/export, don't touch */
+               if (strpos(strtolower($attr), 'addrimported') === 0) { continue; }
+               if (strpos(strtolower($attr), 'addrsyncid') === 0) { continue; }
                if (!in_array($attr, $attrs)) {
                   $old->delete($attr);
                }
