@@ -7,6 +7,7 @@
 function saddr_search(&$saddr, $search, $search_on = [], $attrs = [], $search_op = '=')
 {
    $smarty_entries=array();
+   $dnFound = [];
 
    if(empty($attrs)) {
       $attrs=array('name', 'displayname', 'work_telephone', 'work_email', 
@@ -42,28 +43,34 @@ function saddr_search(&$saddr, $search, $search_on = [], $attrs = [], $search_op
 
                $_sent=saddr_makeSmartyEntry($saddr, $entry);
                if(!empty($_sent['name'])) {
-                  $smarty_entries[]=$_sent;
-                  $smarty_entries = array_merge($smarty_entries, _subsearch($saddr, $ldap, $base, sprintf('(seealso=%s)', $_sent['dn']), $ldap_attrs));
+                  if (!in_array($_sent['dn'], $dnFound)) {
+                     $smarty_entries[]=$_sent;
+                     $dnFound[] = $_sent['dn'];
+                  }
+                  $smarty_entries = array_merge($smarty_entries, _subsearch($saddr, $ldap, $base, sprintf('(seealso=%s)', $_sent['dn']), $ldap_attrs, $dnFound));
                }
             }
          }
       }
    }
-   
+
    usort($smarty_entries, 'cmp');
 
    return $smarty_entries;
 }
 
-function _subsearch($saddr, $ldap, $base, $filter, $ldap_attrs) {
+function _subsearch($saddr, $ldap, $base, $filter, $ldap_attrs, &$dnFound) {
    $subentries = [];
    $subsearch = $ldap->search($base, $filter, $ldap_attrs, 'sub');
    foreach ($subsearch as $subresults) {
       for ($subentry = $subresults->firstEntry(); $subentry; $subentry = $subresults->nextEntry()) {
          $subentry_smarty = saddr_makeSmartyEntry($saddr, $subentry);
          if (!empty($subentry_smarty['name'])) {
-            $subentries[] = $subentry_smarty;
-            $subentries = array_merge($subentries, _subsearch($saddr, $ldap, $base, sprintf('(seealso=%s)', $subentry_smarty['dn']), $ldap_attrs));
+            if (!in_array($subentry_smarty['dn'], $dnFound)) {
+               $subentries[] = $subentry_smarty;
+               $dnFound[] = $subentry_smarty['dn'];
+            }
+            $subentries = array_merge($subentries, _subsearch($saddr, $ldap, $base, sprintf('(seealso=%s)', $subentry_smarty['dn']), $ldap_attrs, $dnFound));
          }
       }
    }
