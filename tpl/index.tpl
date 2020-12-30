@@ -5,6 +5,7 @@
 	<script src="js/gevent.js"></script>
 	<script src="js/location.js"></script>
 	<script src="js/multi.js"></script>
+	<script src="js/auto-copy.js"></script>
 	<script src="node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
 	<script src="node_modules/aselect/src/aselect.js"></script>
 	<title>saddr</title>

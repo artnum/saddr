@@ -219,3 +219,14 @@ a.relation {
    font-size: 0.8em;
    padding: 0 1ch 0 1ch;
 }
+
+.toClipboardOnClick {
+   cursor: pointer;
+   text-decoration: dotted;
+   text-decoration-line: underline;
+}
+
+.toClipboardDone {
+   color: hsla(120, 40%, 35%, 1);
+   transition: color 250ms ease-out;
+}

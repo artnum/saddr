@@ -6,11 +6,11 @@
   ><a href="{saddr_url op="view" id=$e.id}" title="View {$e.name.0}">
 {if isset($e._saddr_res0)}{$e._saddr_res0.0}{else}{$e.name.0}{/if}</a>
 </span>
-<span class="saddr_res1 saddr_resField"
+<span class="saddr_res1 saddr_resField" data-autocopy="1"
   >{if isset($e._saddr_res1)}{$e._saddr_res1.0}{/if}</span>
-<span class="saddr_res2 saddr_resField"
+<span class="saddr_res2 saddr_resField" data-autocopy="1"
   >{if isset($e._saddr_res2)}{$e._saddr_res2.0}{/if}</span>
-<span class="saddr_res3 saddr_resField"
+<span class="saddr_res3 saddr_resField" data-autocopy="1"
   >{if isset($e._saddr_res3)}{$e._saddr_res3.0}{/if}</span>
 </div>
 {/foreach}
