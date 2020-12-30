@@ -27,6 +27,7 @@
 
 <div id="saddrBusiness" class="saddr_section saddr_sectionLeft">
 <h2>Professionnel</h2>
+{saddr_entry e="function" label="Fonction"}
 {saddr_entry e="principalbusiness" label="Activité principale"
   type="sselect" module="category"
   format="@name@" want="uniqueidentifier" recurseOn="parent" labelonview=1 leafOnly=1}

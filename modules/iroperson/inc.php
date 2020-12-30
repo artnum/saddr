@@ -56,7 +56,8 @@ function ext_iroperson_getAttrs()
       'birthday'=>'birthday',
       'jpegphoto'=>'picture',
       'businesscategory' => 'business',
-      'primaryactivity' => 'principalbusiness'
+      'primaryactivity' => 'principalbusiness',
+      'employeetype' => 'function'
       );
 }
 
