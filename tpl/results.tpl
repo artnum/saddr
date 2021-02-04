@@ -15,6 +15,7 @@
 </div>
 {/foreach}
 </table>
+<p><a href="?op={$saddr.op}&search={$saddr.search}&out=csv">Exporter au format CSV</a></p>
 {else}
 <p>Aucun résultat</p>
 {/if}

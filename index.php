@@ -530,6 +530,40 @@ if (!empty($_GET['out']) && $_GET['out'] === 'json') {
    if (!empty($saddr_results['search_results'])) {
       echo json_encode($saddr_results['search_results']);
    }
+} else if (!empty($_GET['out']) && $_GET['out'] === 'csv') {
+   header('Content-Type: text/csv');
+   header('Content-Disposition: inline; filename="liste.csv"');
+   $keys = [];
+   foreach ($saddr_results['search_results'] as $v) {
+      $ks = array_keys($v);
+         foreach ($ks as $k) {
+         if (substr($k, 0, 1) === '_') { continue; }
+         switch($k) {
+            case 'dn':
+            case 'module':
+            case 'id':
+               continue 2;
+         }
+         if (!in_array($k, $keys)) { $keys[] = $k; }
+      }
+   }
+   foreach ($saddr_results['search_results'] as $v) {
+      $first = true;
+      foreach ($keys as $k) {
+         if (!$first) { echo ','; }
+         $first = false;
+         if (isset($v[$k])) {
+            $val = [];
+            foreach ($v[$k] as $_v) {
+               $val[] = str_replace('"' , '\\"', trim($_v));
+            }
+            echo '"' . implode("\n", $val) . '"';
+         } else {
+            echo '""';
+         }
+      }
+      echo "\n";
+   }
 } else {
    saddr_getSmarty($Saddr)->display('index.tpl');
 }
