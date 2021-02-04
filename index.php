@@ -259,8 +259,8 @@ if(isset($_GET['op'])) {
                      array(), $search_op);
                $saddr_results['op']=$_GET['op'];
                /* Reencrypt or you experience some troubles with the browser */
-               $saddr_results['search']=saddr_urlEncrypt($Saddr, 
-                     $search_string);
+               $saddr_results['search']=saddr_urlEncrypt($Saddr, $search_string);
+               $saddr_results['attribute'] = saddr_urlEncrypt($Saddr, $attribute);
                $saddr_results['display']='results.tpl';
                if(!empty($search)) {
                   $saddr_results['search_results']=$search;
