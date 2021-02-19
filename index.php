@@ -16,6 +16,7 @@ define('SADDR__', 1);
 
 include(dirname(__FILE__).'/saddrErrors.php');
 include(dirname(__FILE__).'/lib/saddr.php');
+include(dirname(__FILE__) . '/lib/formats.php');
 
 /* Various options */
 date_default_timezone_set('UTC');
@@ -533,37 +534,7 @@ if (!empty($_GET['out']) && $_GET['out'] === 'json') {
 } else if (!empty($_GET['out']) && $_GET['out'] === 'csv') {
    header('Content-Type: text/csv');
    header('Content-Disposition: inline; filename="liste.csv"');
-   $keys = [];
-   foreach ($saddr_results['search_results'] as $v) {
-      $ks = array_keys($v);
-         foreach ($ks as $k) {
-         if (substr($k, 0, 1) === '_') { continue; }
-         switch($k) {
-            case 'dn':
-            case 'module':
-            case 'id':
-               continue 2;
-         }
-         if (!in_array($k, $keys)) { $keys[] = $k; }
-      }
-   }
-   foreach ($saddr_results['search_results'] as $v) {
-      $first = true;
-      foreach ($keys as $k) {
-         if (!$first) { echo ','; }
-         $first = false;
-         if (isset($v[$k])) {
-            $val = [];
-            foreach ($v[$k] as $_v) {
-               $val[] = str_replace('"' , '\\"', trim($_v));
-            }
-            echo '"' . implode("\n", $val) . '"';
-         } else {
-            echo '""';
-         }
-      }
-      echo "\n";
-   }
+   echo_generic_csv($saddr_results['search_results']);
 } else {
    saddr_getSmarty($Saddr)->display('index.tpl');
 }
