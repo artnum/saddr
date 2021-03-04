@@ -20,7 +20,7 @@
 <div id="saddrNames" class="saddr_section saddr_sectionLeft">
 {saddr_entry e="displayname" label="Nom d'affichage"}
 {saddr_entry e="title" label="Titre"}
-{saddr_entry e="firstname" label="Prénom" multi=1 must=1}
+{saddr_entry e="firstname" label="Prénom" multi=1}
 {saddr_entry e="lastname" label="Nom" searchable=1 must=1}
 </div>
 {/saddr_ifgroup}
